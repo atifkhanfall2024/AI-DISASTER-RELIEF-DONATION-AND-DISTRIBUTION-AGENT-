@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: #F1EFE8;
+}
+
+.dark body {
+  background: #020617;
+}
+
+/* Dark-mode surface + text defaults.
+   Card-level backgrounds use explicit dark:bg-slate-900 utilities in the markup;
+   these rules cover the section-level cream/slate backgrounds and body text so
+   the whole app is legible in dark mode (SRS 3.1 / 5.4: light/dark mode). */
+.dark .bg-\[\#F1EFE8\],
+.dark .bg-brand-cream { background-color: #0f172a !important; }
+.dark .bg-slate-50 { background-color: #1e293b !important; }
+.dark .bg-slate-50\/50 { background-color: rgba(30, 41, 59, 0.5) !important; }
+.dark .text-slate-900 { color: #f1f5f9 !important; }
+.dark .text-slate-800 { color: #e2e8f0 !important; }
+.dark .text-slate-700 { color: #cbd5e1 !important; }
+.dark .text-slate-600 { color: #94a3b8 !important; }
+.dark .text-slate-500 { color: #94a3b8 !important; }
+.dark .border-slate-100 { border-color: #1e293b !important; }
+.dark .border-slate-200 { border-color: #334155 !important; }
+.dark .border-slate-300 { border-color: #475569 !important; }
+.dark input,
+.dark textarea,
+.dark select { background-color: #1e293b !important; color: #e2e8f0 !important; }
+.dark thead.bg-slate-50 { background-color: #1e293b !important; }
+.dark .hover\:bg-slate-50:hover { background-color: #1e293b !important; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+iconify-icon { stroke-width: 1.5; }
