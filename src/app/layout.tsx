@@ -4,8 +4,8 @@ import './globals.css';
 import Providers from '@/components/Providers';
 
 export const metadata: Metadata = {
-  title: 'FloodAid - Relief Distribution',
-  description: 'AI-powered flood relief donation and distribution platform.'
+  title: 'ReliefAid - Disaster Relief Distribution',
+  description: 'AI-powered disaster relief donation and distribution platform.'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -6,6 +6,7 @@ const MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 export interface AiAnalysisInput {
   area: string;
   district?: string;
+  disasterType?: string;
   urgency: string;
   familiesAffected: number;
   description: string;
@@ -33,16 +34,17 @@ export async function analyzeRequest(input: AiAnalysisInput): Promise<AiAnalysis
 
     const model = genAI.getGenerativeModel({ model: MODEL });
 
-    const prompt = `You are an AI relief-verification assistant for a flood disaster relief platform.
+    const prompt = `You are an AI relief-verification assistant for a multi-hazard disaster relief platform (floods, earthquakes, landslides, storms, fires, and other disasters).
 Analyze the following relief request submitted by a field "focal person" and return STRICT JSON only
 (no markdown, no backticks, no commentary) matching this shape:
 {"score": number (0-10, one decimal, higher = more urgent/credible),
- "flags": string[] (short flags like "Possible Duplicate", "High Water Level Detected", "Vague Description"),
+ "flags": string[] (short flags like "Possible Duplicate", "Severe Damage Reported", "Vague Description"),
  "reasoning": string (2-3 sentences explaining the score, written for an admin reviewer),
  "recommendation": "approve" | "reject" | "review"}
 
 Request details:
 Area: ${input.area}${input.district ? ', ' + input.district : ''}
+Disaster type: ${input.disasterType || 'not specified'}
 Self-reported urgency: ${input.urgency}
 Families affected: ${input.familiesAffected}
 Items requested: ${input.items.join(', ') || 'none listed'}

@@ -2,6 +2,15 @@ import { Schema, models, model, Types } from 'mongoose';
 
 export type Urgency = 'low' | 'medium' | 'high' | 'critical';
 export type RequestStatus = 'pending' | 'needs_approval' | 'approved' | 'rejected' | 'fulfilled';
+export type DisasterType =
+  | 'flood'
+  | 'earthquake'
+  | 'landslide'
+  | 'storm'
+  | 'drought'
+  | 'fire'
+  | 'epidemic'
+  | 'other';
 
 export interface IReliefRequest {
   _id: string;
@@ -9,6 +18,7 @@ export interface IReliefRequest {
   area: string;
   district?: string;
   province?: string;
+  disasterType?: DisasterType;
   lat?: number;
   lng?: number;
   urgency: Urgency;
@@ -34,6 +44,11 @@ const RequestSchema = new Schema<IReliefRequest>(
     area: { type: String, required: true },
     district: String,
     province: String,
+    disasterType: {
+      type: String,
+      enum: ['flood', 'earthquake', 'landslide', 'storm', 'drought', 'fire', 'epidemic', 'other'],
+      default: 'flood'
+    },
     lat: Number,
     lng: Number,
     urgency: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },

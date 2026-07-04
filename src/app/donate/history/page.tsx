@@ -39,7 +39,7 @@ export default function DonationHistoryPage() {
         .label { color: #64748b; }
         .amount { font-size: 22px; font-weight: 600; color: #0F6E56; }
       </style></head><body>
-        <h1>FloodAid Donation Receipt</h1>
+        <h1>ReliefAid Donation Receipt</h1>
         <div class="muted">Transparency and speed when it matters most.</div>
         <div class="box">
           <div class="row"><span class="label">Receipt No</span><span>${d.receiptNo}</span></div>

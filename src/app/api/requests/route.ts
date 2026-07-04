@@ -13,6 +13,9 @@ const createSchema = z.object({
   area: z.string().min(2),
   district: z.string().optional(),
   province: z.string().optional(),
+  disasterType: z
+    .enum(['flood', 'earthquake', 'landslide', 'storm', 'drought', 'fire', 'epidemic', 'other'])
+    .optional(),
   lat: z.number().optional(),
   lng: z.number().optional(),
   urgency: z.enum(['low', 'medium', 'high', 'critical']),
@@ -106,6 +109,7 @@ export async function POST(req: Request) {
     const analysis = await analyzeRequest({
       area: data.area,
       district: data.district,
+      disasterType: data.disasterType,
       urgency: data.urgency,
       familiesAffected: data.familiesAffected,
       description: data.description,

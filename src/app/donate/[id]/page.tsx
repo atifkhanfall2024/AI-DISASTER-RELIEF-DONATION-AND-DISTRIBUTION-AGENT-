@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { DisasterBadge } from '@/components/Badges';
 
 const PRESETS = [500, 1000, 2500, 5000];
 
@@ -97,9 +98,12 @@ export default function DonateFormPage() {
             <iconify-icon icon="solar:close-circle-linear" class="text-xl"></iconify-icon>
           </button>
           <div>
-            <span className="inline-flex items-center gap-1 text-brand-rust bg-brand-rust/10 border border-brand-rust/20 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide mb-2">
-              {request.urgency} Need
-            </span>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1 text-brand-rust bg-brand-rust/10 border border-brand-rust/20 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide">
+                {request.urgency} Need
+              </span>
+              <DisasterBadge type={request.disasterType} />
+            </div>
             <h2 className="text-xl font-semibold text-slate-900 tracking-tight leading-tight">
               {request.area}{request.district ? `, ${request.district}` : ''} Relief
             </h2>
@@ -108,6 +112,23 @@ export default function DonateFormPage() {
         </div>
 
         <div className="p-6 overflow-y-auto hide-scroll flex-1 space-y-6">
+          <div className="flex p-1 bg-slate-100 rounded-xl border border-slate-200/50">
+            <button
+              type="button"
+              className="flex-1 py-2 text-sm font-medium bg-white text-slate-900 shadow-sm rounded-lg border border-slate-200 transition"
+            >
+              Donate Funds
+            </button>
+            <button
+              type="button"
+              disabled
+              title="In-kind item donations are coming soon"
+              className="flex-1 py-2 text-sm font-medium text-slate-400 cursor-not-allowed rounded-lg transition"
+            >
+              Donate Items (Coming Soon)
+            </button>
+          </div>
+
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-3">Select Amount (PKR)</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">

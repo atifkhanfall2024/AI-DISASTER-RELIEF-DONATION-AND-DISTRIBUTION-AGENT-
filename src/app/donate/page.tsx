@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { DisasterBadge } from '@/components/Badges';
 
 export default function DonateBrowsePage() {
   const [requests, setRequests] = useState<any[]>([]);
@@ -94,6 +95,9 @@ export default function DonateBrowsePage() {
               >
                 <div className="h-40 bg-gradient-to-tr from-brand-teal/20 to-brand-blue/10 relative flex items-center justify-center">
                   <iconify-icon icon="solar:map-point-bold" class="text-4xl text-brand-teal/40"></iconify-icon>
+                  <div className="absolute top-3 left-3 bg-white/90 rounded-md shadow-sm">
+                    <DisasterBadge type={r.disasterType} />
+                  </div>
                   <div className={`absolute top-3 right-3 text-white text-[10px] font-semibold px-2 py-1 rounded-md backdrop-blur-sm border uppercase tracking-wider flex items-center gap-1 shadow-sm ${urgencyBadgeStyle[r.urgency]}`}>
                     {r.urgency}
                   </div>

@@ -23,7 +23,7 @@ export async function connectDB() {
   if (cached.conn) return cached.conn;
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MONGODB_URI || 'mongodb://127.0.0.1:27017/floodaid', { bufferCommands: false })
+      .connect(MONGODB_URI || 'mongodb://127.0.0.1:27017/reliefaid', { bufferCommands: false })
       .then((m) => m)
       .catch((err) => {
         console.error('MongoDB connection failed:', err.message);

@@ -10,8 +10,8 @@ export default function Navbar() {
   return (
     <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-100 max-w-7xl mx-auto w-full">
       <Link href="/" className="flex items-center gap-2 text-brand-teal font-semibold text-lg tracking-tight">
-        <iconify-icon icon="solar:drop-bold" class="text-2xl"></iconify-icon>
-        FloodAid
+        <iconify-icon icon="solar:hand-heart-bold" class="text-2xl"></iconify-icon>
+        ReliefAid
       </Link>
       <div className="flex gap-4 items-center">
         <ThemeToggle />

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { UrgencyBadge } from '@/components/Badges';
+import { UrgencyBadge, DisasterBadge } from '@/components/Badges';
 
 export default function AdminRequestDetail() {
   const { id } = useParams<{ id: string }>();
@@ -94,7 +94,10 @@ export default function AdminRequestDetail() {
                     </span>
                   </div>
                 </div>
-                <UrgencyBadge urgency={request.urgency} />
+                <div className="flex flex-col items-end gap-2">
+                  <UrgencyBadge urgency={request.urgency} />
+                  <DisasterBadge type={request.disasterType} />
+                </div>
               </div>
               <div className="p-5 grid grid-cols-2 gap-6 bg-slate-50/50">
                 <div>
@@ -129,6 +132,20 @@ export default function AdminRequestDetail() {
                 </div>
               </div>
             )}
+
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-200 p-2 h-48 relative overflow-hidden flex items-center justify-center">
+              <div className="absolute inset-0 bg-slate-100"></div>
+              {typeof request.lat === 'number' && typeof request.lng === 'number' ? (
+                <>
+                  <iconify-icon icon="solar:map-point-bold" class="text-4xl text-brand-rust relative z-10 -mt-4 drop-shadow-md"></iconify-icon>
+                  <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-slate-700 shadow-sm border border-slate-200">
+                    Lat: {request.lat.toFixed(3)}, Lng: {request.lng.toFixed(3)}
+                  </div>
+                </>
+              ) : (
+                <div className="relative z-10 text-sm font-medium text-slate-400">No location data submitted</div>
+              )}
+            </div>
           </div>
 
           <div className="lg:col-span-1">

@@ -11,6 +11,17 @@ const URGENCY_OPTIONS = [
   { value: 'critical', label: 'Critical', color: '[#993C1D]' }
 ];
 
+const DISASTER_TYPES = [
+  { value: 'flood', label: 'Flood', emoji: '🌊' },
+  { value: 'earthquake', label: 'Earthquake', emoji: '🏚️' },
+  { value: 'landslide', label: 'Landslide', emoji: '⛰️' },
+  { value: 'storm', label: 'Storm / Cyclone', emoji: '🌪️' },
+  { value: 'drought', label: 'Drought', emoji: '☀️' },
+  { value: 'fire', label: 'Fire', emoji: '🔥' },
+  { value: 'epidemic', label: 'Epidemic', emoji: '🦠' },
+  { value: 'other', label: 'Other', emoji: '🆘' }
+];
+
 const QUICK_ITEMS = ['Clean Water', 'Medicine', 'Clothing', 'Tents', 'Food Rations', 'Blankets'];
 
 export default function SubmitRequestPage() {
@@ -19,6 +30,11 @@ export default function SubmitRequestPage() {
 
   const [area, setArea] = useState('');
   const [district, setDistrict] = useState('');
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState('');
+  const [disasterType, setDisasterType] = useState('flood');
   const [urgency, setUrgency] = useState('high');
   const [families, setFamilies] = useState(45);
   const [description, setDescription] = useState('');
@@ -33,6 +49,26 @@ export default function SubmitRequestPage() {
     const trimmed = item.trim();
     if (trimmed && !items.includes(trimmed)) setItems([...items, trimmed]);
     setItemInput('');
+  }
+
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by this browser.');
+      return;
+    }
+    setLocating(true);
+    setLocationError('');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLat(pos.coords.latitude);
+        setLng(pos.coords.longitude);
+        setLocating(false);
+      },
+      (err) => {
+        setLocationError(err.message || 'Unable to fetch your location.');
+        setLocating(false);
+      }
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -64,6 +100,9 @@ export default function SubmitRequestPage() {
         body: JSON.stringify({
           area,
           district,
+          disasterType,
+          lat: lat ?? undefined,
+          lng: lng ?? undefined,
           urgency,
           familiesAffected: Number(families),
           description,
@@ -158,12 +197,68 @@ export default function SubmitRequestPage() {
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition bg-white dark:bg-slate-900"
                 />
               </div>
+
+              <button
+                type="button"
+                onClick={useMyLocation}
+                disabled={locating}
+                className="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-100 transition flex items-center justify-center gap-2 text-sm disabled:opacity-60"
+              >
+                <iconify-icon icon="solar:map-point-linear" class="text-lg text-brand-blue"></iconify-icon>
+                {locating ? 'Locating…' : 'Use My GPS Location'}
+              </button>
+              {locationError && <p className="text-xs text-red-600">{locationError}</p>}
+
+              <div className="h-32 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200 border-dashed overflow-hidden relative">
+                {lat != null && lng != null ? (
+                  <>
+                    <iconify-icon icon="solar:map-point-bold" class="text-3xl text-brand-teal relative z-10"></iconify-icon>
+                    <div className="absolute bottom-2 left-2 bg-white/90 px-2 py-1 rounded text-xs font-medium text-slate-700 shadow-sm border border-slate-200">
+                      Lat: {lat.toFixed(3)}, Lng: {lng.toFixed(3)}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <iconify-icon icon="solar:map-minimalistic-linear" class="text-3xl text-slate-300"></iconify-icon>
+                    <div className="absolute inset-0 bg-slate-50/50 flex items-center justify-center text-xs font-medium text-slate-400">
+                      Map Preview Placeholder
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-200 p-6">
             <h2 className="text-base font-semibold text-slate-900 mb-4 border-b border-slate-100 pb-2">2. Situation Assessment</h2>
             <div className="space-y-5">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-3">Disaster Type</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {DISASTER_TYPES.map((opt) => (
+                    <label key={opt.value} className="relative cursor-pointer">
+                      <input
+                        type="radio"
+                        name="disasterType"
+                        className="peer sr-only"
+                        checked={disasterType === opt.value}
+                        onChange={() => setDisasterType(opt.value)}
+                      />
+                      <div
+                        className={`border rounded-xl p-3 flex flex-col items-center text-center transition ${
+                          disasterType === opt.value
+                            ? 'border-brand-teal bg-brand-teal/5 ring-1 ring-brand-teal'
+                            : 'border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="text-xl mb-1">{opt.emoji}</div>
+                        <div className="font-medium text-slate-900 text-xs">{opt.label}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-3">Urgency Level</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

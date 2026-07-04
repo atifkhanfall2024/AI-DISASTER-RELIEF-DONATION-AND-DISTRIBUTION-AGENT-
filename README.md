@@ -1,6 +1,6 @@
-# FloodAid — AI-Powered Flood Relief Platform
+# ReliefAid — AI-Powered Disaster Relief Platform
 
-A full-stack Next.js app matching the FloodAid design: focal persons submit relief requests,
+A full-stack Next.js app for multi-hazard disaster relief (floods, earthquakes, and more): focal persons submit relief requests,
 Google Gemini AI scores/flags them, admins approve or reject, and donors fund verified needs.
 
 **Stack**
@@ -61,9 +61,9 @@ npm run seed
 Creates:
 | Role  | Email                | Password    |
 |-------|----------------------|-------------|
-| Admin | admin@floodaid.dev   | password123 |
-| Focal | focal@floodaid.dev   | password123 |
-| Donor | donor@floodaid.dev   | password123 |
+| Admin | admin@reliefaid.dev   | password123 |
+| Focal | focal@reliefaid.dev   | password123 |
+| Donor | donor@reliefaid.dev   | password123 |
 
 ## 7. Run it
 

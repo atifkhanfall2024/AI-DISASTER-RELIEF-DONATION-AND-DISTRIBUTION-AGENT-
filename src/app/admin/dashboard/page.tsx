@@ -1,18 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { UrgencyBadge, StatusBadge } from '@/components/Badges';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { UrgencyBadge, StatusBadge, DisasterBadge } from '@/components/Badges';
 import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AdminDashboard() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <AdminDashboardContent />
+    </Suspense>
+  );
+}
+
+function AdminDashboardContent() {
   const { status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [requests, setRequests] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all');
   const [urgencyFilter, setUrgencyFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -45,14 +54,41 @@ export default function AdminDashboard() {
     <div className="min-h-screen flex bg-brand-cream">
       <aside className="w-64 bg-slate-900 text-slate-300 fixed h-full hidden md:flex flex-col z-10">
         <div className="p-6 border-b border-slate-800 flex items-center gap-2 text-white font-semibold text-lg tracking-tight">
-          <iconify-icon icon="solar:drop-bold" class="text-2xl text-brand-teal"></iconify-icon> FloodAid Admin
+          <iconify-icon icon="solar:hand-heart-bold" class="text-2xl text-brand-teal"></iconify-icon> ReliefAid Admin
         </div>
         <div className="p-4 flex-1">
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-3">Management</div>
           <nav className="space-y-1">
-            <Link href="/admin/dashboard" className="flex items-center gap-3 px-3 py-2 bg-brand-teal text-white rounded-lg font-medium transition">
+            <Link
+              href="/admin/dashboard"
+              onClick={() => setStatusFilter('all')}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition ${
+                statusFilter === 'all' ? 'bg-brand-teal text-white' : 'hover:bg-slate-800 hover:text-white'
+              }`}
+            >
               <iconify-icon icon="solar:widget-2-linear" class="text-lg"></iconify-icon> All Requests
             </Link>
+            <button
+              onClick={() => setStatusFilter('needs_approval')}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg font-medium transition ${
+                statusFilter === 'needs_approval' ? 'bg-brand-teal text-white' : 'hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <iconify-icon icon="solar:magic-stick-3-linear" class="text-lg"></iconify-icon> Pending Review
+              </div>
+              {stats?.pendingReview > 0 && (
+                <span className="bg-brand-amber text-white text-[10px] px-1.5 py-0.5 rounded-md">{stats.pendingReview}</span>
+              )}
+            </button>
+            <button
+              onClick={() => setStatusFilter('approved')}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition ${
+                statusFilter === 'approved' ? 'bg-brand-teal text-white' : 'hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <iconify-icon icon="solar:check-circle-linear" class="text-lg"></iconify-icon> Approved
+            </button>
             <Link href="/admin/logs" className="flex items-center gap-3 px-3 py-2 hover:bg-slate-800 hover:text-white rounded-lg font-medium transition mt-4">
               <iconify-icon icon="solar:history-linear" class="text-lg"></iconify-icon> System Logs
             </Link>
@@ -139,6 +175,7 @@ export default function AdminDashboard() {
               <tr>
                 <th className="px-5 py-3">ID</th>
                 <th className="px-5 py-3">Location</th>
+                <th className="px-5 py-3">Type</th>
                 <th className="px-5 py-3">Urgency</th>
                 <th className="px-5 py-3 text-center">AI Score</th>
                 <th className="px-5 py-3">Flags</th>
@@ -147,14 +184,15 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
-              {loading && <tr><td className="px-5 py-6 text-slate-400" colSpan={7}>Loading…</td></tr>}
+              {loading && <tr><td className="px-5 py-6 text-slate-400" colSpan={8}>Loading…</td></tr>}
               {!loading && requests.length === 0 && (
-                <tr><td className="px-5 py-6 text-slate-400" colSpan={7}>No requests match these filters.</td></tr>
+                <tr><td className="px-5 py-6 text-slate-400" colSpan={8}>No requests match these filters.</td></tr>
               )}
               {requests.map((r) => (
                 <tr key={r._id} className="hover:bg-slate-50 transition cursor-pointer" onClick={() => router.push(`/admin/requests/${r._id}`)}>
                   <td className="px-5 py-3 font-medium text-slate-900">#{r._id.slice(-6).toUpperCase()}</td>
                   <td className="px-5 py-3 text-slate-600">{r.area}{r.district ? `, ${r.district}` : ''}</td>
+                  <td className="px-5 py-3"><DisasterBadge type={r.disasterType} /></td>
                   <td className="px-5 py-3"><UrgencyBadge urgency={r.urgency} /></td>
                   <td className="px-5 py-3 text-center">
                     {typeof r.aiScore === 'number' ? (

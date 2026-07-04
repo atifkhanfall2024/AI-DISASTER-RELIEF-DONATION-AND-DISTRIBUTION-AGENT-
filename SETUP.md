@@ -1,4 +1,4 @@
-# FloodAid — VS Code Quickstart
+# ReliefAid — VS Code Quickstart
 
 Get the project running on your machine in ~5 minutes. Full details are in `README.md`;
 this is the fast path.
@@ -47,8 +47,8 @@ In Supabase, also create a **public Storage bucket named `evidence`** (Storage �
 ```bash
 npm run seed
 ```
-Creates three logins (password `password123`): `admin@floodaid.dev`,
-`focal@floodaid.dev`, `donor@floodaid.dev`.
+Creates three logins (password `password123`): `admin@reliefaid.dev`,
+`focal@reliefaid.dev`, `donor@reliefaid.dev`.
 
 ## 5. Run it
 ```bash

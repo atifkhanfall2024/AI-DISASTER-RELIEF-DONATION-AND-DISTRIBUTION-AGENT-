@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { UrgencyBadge, StatusBadge } from '@/components/Badges';
+import { UrgencyBadge, StatusBadge, DisasterBadge } from '@/components/Badges';
 
 export default function FocalDashboard() {
   const { data: session, status } = useSession();
@@ -27,7 +27,8 @@ export default function FocalDashboard() {
   const stats = {
     total: requests.length,
     pending: requests.filter((r) => r.status === 'needs_approval' || r.status === 'pending').length,
-    approved: requests.filter((r) => r.status === 'approved' || r.status === 'fulfilled').length
+    approved: requests.filter((r) => r.status === 'approved').length,
+    fulfilled: requests.filter((r) => r.status === 'fulfilled').length
   };
 
   return (
@@ -46,7 +47,7 @@ export default function FocalDashboard() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 shadow-sm">
             <div className="text-slate-500 text-xs mb-1">Total Submitted</div>
             <div className="text-2xl font-semibold text-slate-900 tracking-tight">{stats.total}</div>
@@ -58,6 +59,10 @@ export default function FocalDashboard() {
           <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 shadow-sm">
             <div className="text-slate-500 text-xs mb-1">Approved</div>
             <div className="text-2xl font-semibold text-brand-teal tracking-tight">{stats.approved}</div>
+          </div>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="text-slate-500 text-xs mb-1">Fulfilled</div>
+            <div className="text-2xl font-semibold text-brand-blue tracking-tight">{stats.fulfilled}</div>
           </div>
         </div>
 
@@ -71,6 +76,7 @@ export default function FocalDashboard() {
                 <tr>
                   <th className="px-5 py-3">ID</th>
                   <th className="px-5 py-3">Location</th>
+                  <th className="px-5 py-3">Type</th>
                   <th className="px-5 py-3">Urgency</th>
                   <th className="px-5 py-3">Families</th>
                   <th className="px-5 py-3">Status</th>
@@ -79,15 +85,16 @@ export default function FocalDashboard() {
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
                 {loading && (
-                  <tr><td className="px-5 py-6 text-slate-400" colSpan={6}>Loading…</td></tr>
+                  <tr><td className="px-5 py-6 text-slate-400" colSpan={7}>Loading…</td></tr>
                 )}
                 {!loading && requests.length === 0 && (
-                  <tr><td className="px-5 py-6 text-slate-400" colSpan={6}>No requests submitted yet.</td></tr>
+                  <tr><td className="px-5 py-6 text-slate-400" colSpan={7}>No requests submitted yet.</td></tr>
                 )}
                 {requests.map((r) => (
                   <tr key={r._id} className="hover:bg-slate-50 transition">
                     <td className="px-5 py-4 font-medium text-slate-900">#{r._id.slice(-6).toUpperCase()}</td>
                     <td className="px-5 py-4 text-slate-600">{r.area}{r.district ? `, ${r.district}` : ''}</td>
+                    <td className="px-5 py-4"><DisasterBadge type={r.disasterType} /></td>
                     <td className="px-5 py-4"><UrgencyBadge urgency={r.urgency} /></td>
                     <td className="px-5 py-4 text-slate-600">{r.familiesAffected}</td>
                     <td className="px-5 py-4"><StatusBadge status={r.status} /></td>

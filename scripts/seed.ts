@@ -19,20 +19,20 @@ async function main() {
   const passwordHash = await bcrypt.hash('password123', 10);
 
   const admin = await User.findOneAndUpdate(
-    { email: 'admin@floodaid.dev' },
-    { name: 'Admin User', email: 'admin@floodaid.dev', passwordHash, role: 'admin' },
+    { email: 'admin@reliefaid.dev' },
+    { name: 'Admin User', email: 'admin@reliefaid.dev', passwordHash, role: 'admin' },
     { upsert: true, new: true }
   );
 
   const focal = await User.findOneAndUpdate(
-    { email: 'focal@floodaid.dev' },
-    { name: 'Zafar Ali', email: 'focal@floodaid.dev', passwordHash, role: 'focal', cnic: '41303-1234567-1', phone: '+92 300 1234567' },
+    { email: 'focal@reliefaid.dev' },
+    { name: 'Zafar Ali', email: 'focal@reliefaid.dev', passwordHash, role: 'focal', cnic: '41303-1234567-1', phone: '+92 300 1234567' },
     { upsert: true, new: true }
   );
 
   await User.findOneAndUpdate(
-    { email: 'donor@floodaid.dev' },
-    { name: 'Sana Malik', email: 'donor@floodaid.dev', passwordHash, role: 'donor' },
+    { email: 'donor@reliefaid.dev' },
+    { name: 'Sana Malik', email: 'donor@reliefaid.dev', passwordHash, role: 'donor' },
     { upsert: true, new: true }
   );
 
@@ -42,6 +42,7 @@ async function main() {
       focal: focal._id,
       area: 'Jamshoro District',
       district: 'Sindh',
+      disasterType: 'flood',
       urgency: 'critical',
       familiesAffected: 210,
       description:
@@ -59,10 +60,35 @@ async function main() {
     { upsert: true, new: true }
   );
 
+  await ReliefRequest.findOneAndUpdate(
+    { area: 'Harnai', focal: focal._id },
+    {
+      focal: focal._id,
+      area: 'Harnai',
+      district: 'Balochistan',
+      disasterType: 'earthquake',
+      urgency: 'high',
+      familiesAffected: 85,
+      description:
+        'A 5.9 magnitude earthquake damaged dozens of homes overnight. Families need tents and blankets as aftershocks continue and night temperatures drop sharply.',
+      items: ['Tents', 'Blankets', 'Medicine'],
+      images: [],
+      status: 'approved',
+      aiScore: 8.6,
+      aiFlags: [],
+      aiReasoning:
+        'Credible earthquake report with a clear damage description and seasonal exposure risk; high families-affected count.',
+      aiRecommendation: 'approve',
+      donationGoal: 300000,
+      donationRaised: 60000
+    },
+    { upsert: true, new: true }
+  );
+
   console.log('Seed complete. Demo accounts (password: password123):');
-  console.log(' - admin@floodaid.dev (admin)');
-  console.log(' - focal@floodaid.dev (focal)');
-  console.log(' - donor@floodaid.dev (donor)');
+  console.log(' - admin@reliefaid.dev (admin)');
+  console.log(' - focal@reliefaid.dev (focal)');
+  console.log(' - donor@reliefaid.dev (donor)');
 
   await mongoose.disconnect();
 }

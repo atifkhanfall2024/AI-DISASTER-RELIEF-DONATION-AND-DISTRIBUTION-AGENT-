@@ -40,3 +40,24 @@ export function StatusBadge({ status }: { status: string }) {
     </span>
   );
 }
+
+const disasterMeta: Record<string, { label: string; emoji: string }> = {
+  flood: { label: 'Flood', emoji: '🌊' },
+  earthquake: { label: 'Earthquake', emoji: '🏚️' },
+  landslide: { label: 'Landslide', emoji: '⛰️' },
+  storm: { label: 'Storm', emoji: '🌪️' },
+  drought: { label: 'Drought', emoji: '☀️' },
+  fire: { label: 'Fire', emoji: '🔥' },
+  epidemic: { label: 'Epidemic', emoji: '🦠' },
+  other: { label: 'Other', emoji: '🆘' }
+};
+
+export function DisasterBadge({ type }: { type?: string }) {
+  const meta = disasterMeta[type || 'other'] || disasterMeta.other;
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border text-slate-600 bg-slate-100 border-slate-200">
+      <span>{meta.emoji}</span>
+      {meta.label}
+    </span>
+  );
+}

@@ -59,7 +59,7 @@ export default async function LandingPage() {
             Connecting Relief <br className="hidden md:block" /> Where It&apos;s Needed Most
           </h1>
           <p className="text-lg text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            AI-powered flood relief donation and distribution — transparent, fast, and need-based. Ensure your
+            AI-powered disaster relief donation and distribution — transparent, fast, and need-based. Ensure your
             help reaches the right hands.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -99,7 +99,7 @@ export default async function LandingPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-16">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-12 text-center">How FloodAid Works</h2>
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-12 text-center">How ReliefAid Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
           <div className="hidden md:block absolute top-1/4 left-[16%] right-[16%] h-[1px] bg-slate-200 -z-10"></div>
           <div className="text-center bg-white dark:bg-slate-900">
@@ -191,8 +191,8 @@ export default async function LandingPage() {
 
       <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 py-12 text-center">
         <div className="flex justify-center items-center gap-2 text-brand-teal font-semibold text-lg tracking-tight mb-4">
-          <iconify-icon icon="solar:drop-bold" class="text-2xl"></iconify-icon>
-          FloodAid
+          <iconify-icon icon="solar:hand-heart-bold" class="text-2xl"></iconify-icon>
+          ReliefAid
         </div>
         <p className="text-slate-500 mb-6">Transparency and speed when it matters most.</p>
         <div className="flex justify-center gap-6 text-sm font-medium text-slate-600">
