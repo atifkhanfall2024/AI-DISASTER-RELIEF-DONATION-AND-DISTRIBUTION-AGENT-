@@ -1,21 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { z } from 'zod';
 import { authOptions } from '@/lib/authOptions';
 import { connectDB } from '@/lib/mongodb';
 import Donation from '@/lib/models/Donation';
-import ReliefRequest from '@/lib/models/Request';
-import Log from '@/lib/models/Log';
 
 export const dynamic = 'force-dynamic';
-
-const schema = z.object({
-  requestId: z.string(),
-  amount: z.number().positive(),
-  paymentMethod: z.string().default('Card'),
-  message: z.string().optional(),
-  donorName: z.string().optional()
-});
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -36,45 +25,13 @@ export async function GET(req: Request) {
   return NextResponse.json(donations);
 }
 
-export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  const data = schema.parse(await req.json());
-  await connectDB();
-
-  const relief = await ReliefRequest.findById(data.requestId);
-  if (!relief) return NextResponse.json({ error: 'Request not found' }, { status: 404 });
-  // Donations only flow to admin-approved, still-open requests.
-  if (relief.status !== 'approved') {
-    return NextResponse.json(
-      {
-        error:
-          relief.status === 'fulfilled'
-            ? 'This request has already been fulfilled — no further donations are needed.'
-            : 'Donations can only be made to approved requests.'
-      },
-      { status: 400 }
-    );
-  }
-
-  const donation = await Donation.create({
-    request: relief._id,
-    donor: session?.user?.id,
-    donorName: data.donorName || session?.user?.name || 'Anonymous Donor',
-    amount: data.amount,
-    paymentMethod: data.paymentMethod,
-    message: data.message
-  });
-
-  relief.donationRaised = (relief.donationRaised || 0) + data.amount;
-  await relief.save();
-
-  await Log.create({
-    actorName: donation.donorName,
-    actorType: 'donor',
-    action: `Donated PKR ${data.amount.toLocaleString()}`,
-    type: 'donation',
-    relatedId: `#${relief._id.toString().slice(-6).toUpperCase()}`
-  });
-
-  return NextResponse.json(donation, { status: 201 });
+// Donations are no longer created here. Money must flow through the payment
+// gateway: POST /api/payments/initiate → gateway checkout → verified callback →
+// Donation record. This closes the hole where a crafted request could inflate
+// donationRaised without any payment.
+export async function POST() {
+  return NextResponse.json(
+    { error: 'Direct donations are disabled. Start a checkout via /api/payments/initiate.' },
+    { status: 410 }
+  );
 }

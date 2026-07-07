@@ -14,12 +14,9 @@ export default function DonateFormPage() {
   const [distributions, setDistributions] = useState<any[]>([]);
   const [amount, setAmount] = useState(2500);
   const [customAmount, setCustomAmount] = useState('');
-  const [method, setMethod] = useState('Credit/Debit Card');
   const [message, setMessage] = useState('');
   const [donorName, setDonorName] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
-  const [receiptNo, setReceiptNo] = useState('');
 
   useEffect(() => {
     fetch(`/api/requests/${id}`)
@@ -31,67 +28,51 @@ export default function DonateFormPage() {
       .then((d) => setDistributions(Array.isArray(d) ? d : []));
   }, [id]);
 
+  // Kicks off a real checkout: the server creates a PENDING payment and tells us
+  // where to send the donor — the JazzCash hosted page (keys configured) or the
+  // built-in demo gateway. The donation record is only created after the gateway
+  // confirms payment (see /api/payments/*).
   async function confirmDonation() {
     setSubmitting(true);
     try {
       const finalAmount = customAmount ? Number(customAmount) : amount;
-      const res = await fetch('/api/donations', {
+      const res = await fetch('/api/payments/initiate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           requestId: id,
           amount: finalAmount,
-          paymentMethod: method,
-          message,
+          message: message || undefined,
           donorName: donorName || undefined
         })
       });
-      if (!res.ok) throw new Error((await res.json()).error);
-      const created = await res.json();
-      setReceiptNo(created.receiptNo || '');
-      setDone(true);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      if (data.gateway === 'demo') {
+        router.push(data.url);
+        return;
+      }
+      // JazzCash hosted checkout wants a browser form POST — build and submit one.
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.form.action;
+      for (const [k, v] of Object.entries(data.form.fields as Record<string, string>)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = k;
+        input.value = v;
+        form.appendChild(input);
+      }
+      document.body.appendChild(form);
+      form.submit();
     } catch (e: any) {
       alert(e.message);
-    } finally {
       setSubmitting(false);
     }
   }
 
   if (!request) return <div className="p-8 text-slate-400">Loading…</div>;
-
-  if (done) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 p-10 text-center max-w-md">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-brand-teal/10 flex items-center justify-center">
-            <iconify-icon icon="solar:check-circle-bold" class="text-3xl text-brand-teal"></iconify-icon>
-          </div>
-          <h1 className="text-xl font-semibold text-slate-900 mb-2">Thank you for your donation!</h1>
-          <p className="text-slate-500 mb-4">Your contribution to {request.area} has been recorded.</p>
-          {receiptNo && (
-            <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 mb-6 text-sm">
-              <span className="text-slate-500">Receipt No: </span>
-              <span className="font-mono font-semibold text-slate-800">{receiptNo}</span>
-            </div>
-          )}
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={() => router.push('/donate/history')}
-              className="bg-brand-teal text-white px-6 py-3 rounded-xl font-medium hover:bg-brand-teal/90 transition"
-            >
-              View My Donation History
-            </button>
-            <button
-              onClick={() => router.push('/donate')}
-              className="bg-white dark:bg-slate-900 border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-medium hover:bg-slate-50 transition"
-            >
-              Browse More Requests
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
@@ -179,19 +160,6 @@ export default function DonateFormPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1.5">Payment Method</label>
-            <select
-              value={method}
-              onChange={(e) => setMethod(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition bg-white dark:bg-slate-900 appearance-none"
-            >
-              <option>Credit/Debit Card</option>
-              <option>Bank Transfer</option>
-              <option>EasyPaisa / JazzCash</option>
-            </select>
-          </div>
-
-          <div>
             <label className="block text-xs font-medium text-slate-600 mb-1.5">Message of Support (Optional)</label>
             <textarea
               value={message}
@@ -231,10 +199,12 @@ export default function DonateFormPage() {
                 disabled={submitting}
                 className="w-full bg-brand-teal text-white py-3 rounded-xl font-medium hover:bg-brand-teal/90 transition shadow-sm text-base flex items-center justify-center gap-2 mb-3 disabled:opacity-60"
               >
-                {submitting ? 'Processing…' : 'Confirm Donation'} <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+                {submitting ? 'Redirecting to gateway…' : 'Proceed to Secure Payment'}
+                <iconify-icon icon="solar:lock-keyhole-linear"></iconify-icon>
               </button>
               <p className="text-center text-xs text-slate-500 flex justify-center items-center gap-1">
-                <iconify-icon icon="solar:shield-check-linear"></iconify-icon> This is a demo checkout — no real payment is processed.
+                <iconify-icon icon="solar:shield-check-linear"></iconify-icon> You&apos;ll complete payment on a secure
+                gateway page — your donation is only recorded after the gateway confirms it.
               </p>
             </>
           )}
