@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { UrgencyBadge, DisasterBadge } from '@/components/Badges';
 import DistributionTimeline from '@/components/DistributionTimeline';
+
+// Leaflet is browser-only — render the mini map client-side.
+const RequestsMap = dynamic(() => import('@/components/RequestsMap'), {
+  ssr: false,
+  loading: () => <div className="h-48 flex items-center justify-center text-slate-400 text-sm">Loading map…</div>
+});
 
 export default function AdminRequestDetail() {
   const { id } = useParams<{ id: string }>();
@@ -158,17 +165,13 @@ export default function AdminRequestDetail() {
               </div>
             )}
 
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-200 p-2 h-48 relative overflow-hidden flex items-center justify-center">
-              <div className="absolute inset-0 bg-slate-100"></div>
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-200 p-2 relative overflow-hidden">
               {typeof request.lat === 'number' && typeof request.lng === 'number' ? (
-                <>
-                  <iconify-icon icon="solar:map-point-bold" class="text-4xl text-brand-rust relative z-10 -mt-4 drop-shadow-md"></iconify-icon>
-                  <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-slate-700 shadow-sm border border-slate-200">
-                    Lat: {request.lat.toFixed(3)}, Lng: {request.lng.toFixed(3)}
-                  </div>
-                </>
+                <RequestsMap requests={[request]} height={220} />
               ) : (
-                <div className="relative z-10 text-sm font-medium text-slate-400">No location data submitted</div>
+                <div className="h-48 flex items-center justify-center text-sm font-medium text-slate-400">
+                  No location data submitted
+                </div>
               )}
             </div>
 

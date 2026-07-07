@@ -36,9 +36,17 @@ export default function Navbar() {
               </Link>
             )}
             {session.user.role === 'admin' && (
-              <Link href="/admin/dashboard" className="text-slate-600 hover:text-slate-900 font-medium transition">
-                Admin
-              </Link>
+              <>
+                <Link href="/admin/dashboard" className="text-slate-600 hover:text-slate-900 font-medium transition">
+                  Admin
+                </Link>
+                <Link href="/admin/map" className="text-slate-600 hover:text-slate-900 font-medium transition hidden sm:inline">
+                  Map
+                </Link>
+                <Link href="/admin/analytics" className="text-slate-600 hover:text-slate-900 font-medium transition hidden sm:inline">
+                  Analytics
+                </Link>
+              </>
             )}
             <Link href="/donate" className="text-slate-600 hover:text-slate-900 font-medium transition">
               Donate

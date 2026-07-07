@@ -12,13 +12,17 @@
   "dependencies": {
     "@google/generative-ai": "^0.17.0",
     "@supabase/supabase-js": "^2.45.1",
+    "@types/leaflet": "^1.9.21",
     "bcryptjs": "^2.4.3",
+    "leaflet": "^1.9.4",
     "mongoose": "^8.5.1",
     "next": "14.2.5",
     "next-auth": "^4.24.7",
     "nodemailer": "^7.0.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1",
+    "recharts": "^3.9.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
