@@ -5,7 +5,11 @@
  *
  * Run with: npm run seed
  */
-import 'dotenv/config';
+import { config as loadEnv } from 'dotenv';
+// Next.js loads .env.local automatically, but this standalone script does not,
+// so load .env.local first (falling back to .env) before reading MONGODB_URI.
+loadEnv({ path: '.env.local' });
+loadEnv();
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import User from '../src/lib/models/User';

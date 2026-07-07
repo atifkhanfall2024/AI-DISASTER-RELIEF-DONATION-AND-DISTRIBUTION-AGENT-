@@ -7,7 +7,7 @@ Google Gemini AI scores/flags them, admins approve or reject, and donors fund ve
 - Next.js 14 (App Router) + TypeScript + Tailwind CSS
 - MongoDB (Mongoose) — all app data: users, requests, donations, logs
 - Supabase Storage — evidence photo uploads only (no Supabase DB tables needed)
-- Google Gemini API (`gemini-1.5-flash`, free tier) — request scoring & duplicate/urgency analysis
+- Google Gemini API (`gemini-2.5-flash`, free tier) — request scoring & duplicate/urgency analysis
 - NextAuth.js (credentials login, JWT sessions, roles: `donor` / `focal` / `admin`)
 
 ---
@@ -155,5 +155,5 @@ If your evaluation strictly requires the separate Python microservice, it's a sm
 move `analyzeRequest()` into a FastAPI service exposing `POST /analyze`, and have
 `api/requests` call it over HTTP instead of importing the function. The request/response shape
 (`{score, flags, reasoning, recommendation}`) is already defined, so the contract wouldn't change.
-The `gemini-1.5-flash` free tier keeps AI scoring well under the SRS's 2-second target for typical
+The `gemini-2.5-flash` free tier keeps AI scoring well under the SRS's 2-second target for typical
 requests.
