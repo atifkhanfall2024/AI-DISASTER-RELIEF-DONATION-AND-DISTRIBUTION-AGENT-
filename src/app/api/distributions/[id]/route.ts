@@ -6,6 +6,7 @@ import { connectDB } from '@/lib/mongodb';
 import Distribution from '@/lib/models/Distribution';
 import ReliefRequest from '@/lib/models/Request';
 import Log from '@/lib/models/Log';
+import { notifyRequestFulfilled } from '@/lib/notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +59,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
           type: 'approval',
           relatedId
         });
+        // Close the loop: tell the focal person and every donor the aid arrived.
+        await notifyRequestFulfilled(request);
       }
     }
 

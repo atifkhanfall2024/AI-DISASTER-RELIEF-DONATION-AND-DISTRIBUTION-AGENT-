@@ -1,6 +1,8 @@
 import Donation from '@/lib/models/Donation';
 import ReliefRequest from '@/lib/models/Request';
 import Log from '@/lib/models/Log';
+import User from '@/lib/models/User';
+import { notifyDonationReceived } from '@/lib/notify';
 import type { IPayment } from '@/lib/models/Payment';
 
 /**
@@ -34,6 +36,17 @@ export async function completeDonationFromPayment(payment: IPayment & { save(): 
     action: `Donated PKR ${payment.amount.toLocaleString()} (${payment.method})`,
     type: 'donation',
     relatedId: `#${relief._id.toString().slice(-6).toUpperCase()}`
+  });
+
+  // Receipt to the donor + heads-up to the focal person (self-catching).
+  const donorUser = payment.donor ? await User.findById(payment.donor).select('email').lean<any>() : null;
+  await notifyDonationReceived({
+    request: relief,
+    donorEmail: donorUser?.email,
+    donorName: payment.donorName,
+    amount: payment.amount,
+    receiptNo: donation.receiptNo,
+    method: payment.method
   });
 
   return donation;

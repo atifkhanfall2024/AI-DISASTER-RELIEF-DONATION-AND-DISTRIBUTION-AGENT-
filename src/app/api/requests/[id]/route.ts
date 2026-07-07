@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/authOptions';
 import { connectDB } from '@/lib/mongodb';
 import ReliefRequest from '@/lib/models/Request';
 import Log from '@/lib/models/Log';
+import { notifyRequestDecision, notifyRequestFulfilled } from '@/lib/notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +51,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     type: action === 'approve' ? 'approval' : action === 'reject' ? 'rejection' : 'approval',
     relatedId: `#${request._id.toString().slice(-6).toUpperCase()}`
   });
+
+  // Notify the people affected by this decision (self-catching, never blocks).
+  if (action === 'approve' || action === 'reject') {
+    await notifyRequestDecision(request, action === 'approve' ? 'approved' : 'rejected', adminNotes);
+  } else {
+    await notifyRequestFulfilled(request);
+  }
 
   return NextResponse.json(request);
 }

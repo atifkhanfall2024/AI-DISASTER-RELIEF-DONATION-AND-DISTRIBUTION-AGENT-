@@ -6,6 +6,7 @@ import { connectDB } from '@/lib/mongodb';
 import ReliefRequest from '@/lib/models/Request';
 import Log from '@/lib/models/Log';
 import { analyzeRequest } from '@/lib/gemini';
+import { notifyRequestSubmitted } from '@/lib/notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -136,6 +137,9 @@ export async function POST(req: Request) {
       type: 'ai',
       relatedId: `#${request._id.toString().slice(-6).toUpperCase()}`
     });
+
+    // Let the review team know a scored request awaits them (never blocks the API).
+    await notifyRequestSubmitted(request);
 
     return NextResponse.json(request, { status: 201 });
   } catch (err: any) {
