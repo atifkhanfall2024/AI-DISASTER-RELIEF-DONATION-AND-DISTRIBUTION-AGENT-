@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { supabaseAdmin } from '@/lib/supabase';
+import { checkRateLimit, resetRateLimit } from '@/lib/rateLimit';
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
@@ -17,13 +18,25 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
+        const email = credentials.email.toLowerCase();
+
+        // Throttle brute-force: 5 attempts per email per 15 min. The counter is
+        // cleared on a successful login so a legitimate user is never locked out.
+        const key = `login:${email}`;
+        const gate = checkRateLimit(key, 5, 15 * 60 * 1000);
+        if (!gate.allowed) {
+          throw new Error(`Too many login attempts. Please try again in ${gate.retryAfterSec}s.`);
+        }
+
         await connectDB();
-        const user = await User.findOne({ email: credentials.email.toLowerCase() });
+        const user = await User.findOne({ email });
         if (!user) return null;
         // OAuth-only accounts have no password — they must sign in with Google.
         if (!user.passwordHash) return null;
         const valid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!valid) return null;
+
+        resetRateLimit(key);
         return {
           id: user._id.toString(),
           name: user.name,

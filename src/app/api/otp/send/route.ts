@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createOtp, normalizeTarget } from '@/lib/otp';
 import { sendEmail, isEmailConfigured } from '@/lib/mailer';
 import { sendSms, isSmsConfigured } from '@/lib/sms';
+import { checkRateLimit, clientIp, tooManyRequests } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,18 @@ export async function POST(req: Request) {
     }
     if (channel === 'sms' && !/^\+?\d{7,15}$/.test(target)) {
       return NextResponse.json({ error: 'Enter a valid phone number (7–15 digits).' }, { status: 400 });
+    }
+
+    // Rate limit to stop OTP bombing now that email/SMS really deliver:
+    // at most 3 codes per target and 10 per IP in a 15-minute window.
+    const ip = clientIp(req);
+    const perTarget = checkRateLimit(`otp:send:${channel}:${target}`, 3, 15 * 60 * 1000);
+    if (!perTarget.allowed) {
+      return tooManyRequests(perTarget.retryAfterSec, 'Too many codes requested for this contact. Try again later.');
+    }
+    const perIp = checkRateLimit(`otp:send:ip:${ip}`, 10, 15 * 60 * 1000);
+    if (!perIp.allowed) {
+      return tooManyRequests(perIp.retryAfterSec, 'Too many verification attempts. Please try again later.');
     }
 
     const { code } = await createOtp(channel, target);

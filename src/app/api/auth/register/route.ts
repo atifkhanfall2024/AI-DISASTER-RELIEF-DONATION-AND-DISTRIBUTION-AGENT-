@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { isVerified, normalizeTarget } from '@/lib/otp';
+import { checkRateLimit, clientIp, tooManyRequests } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,12 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   try {
+    // Cap account creation per IP (5/hour) against mass/automated signups.
+    const gate = checkRateLimit(`register:ip:${clientIp(req)}`, 5, 60 * 60 * 1000);
+    if (!gate.allowed) {
+      return tooManyRequests(gate.retryAfterSec, 'Too many sign-up attempts. Please try again later.');
+    }
+
     const body = await req.json();
     const data = schema.parse(body);
 
