@@ -81,14 +81,15 @@ export default function FocalDashboard() {
                   <th className="px-5 py-3">Families</th>
                   <th className="px-5 py-3">Status</th>
                   <th className="px-5 py-3">Date</th>
+                  <th className="px-5 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
                 {loading && (
-                  <tr><td className="px-5 py-6 text-slate-400" colSpan={7}>Loading…</td></tr>
+                  <tr><td className="px-5 py-6 text-slate-400" colSpan={8}>Loading…</td></tr>
                 )}
                 {!loading && requests.length === 0 && (
-                  <tr><td className="px-5 py-6 text-slate-400" colSpan={7}>No requests submitted yet.</td></tr>
+                  <tr><td className="px-5 py-6 text-slate-400" colSpan={8}>No requests submitted yet.</td></tr>
                 )}
                 {requests.map((r) => (
                   <tr key={r._id} className="hover:bg-slate-50 transition">
@@ -99,6 +100,17 @@ export default function FocalDashboard() {
                     <td className="px-5 py-4 text-slate-600">{r.familiesAffected}</td>
                     <td className="px-5 py-4"><StatusBadge status={r.status} /></td>
                     <td className="px-5 py-4 text-slate-500">{new Date(r.createdAt).toLocaleDateString()}</td>
+                    <td className="px-5 py-4">
+                      {(r.status === 'approved' || r.status === 'fulfilled') && (
+                        <Link
+                          href={`/focal/distribute/${r._id}`}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-brand-teal border border-brand-teal/30 bg-brand-teal/5 px-2.5 py-1 rounded-lg hover:bg-brand-teal/10 transition"
+                        >
+                          <iconify-icon icon="solar:box-minimalistic-linear"></iconify-icon>
+                          {r.status === 'approved' ? 'Record Distribution' : 'View Distributions'}
+                        </Link>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

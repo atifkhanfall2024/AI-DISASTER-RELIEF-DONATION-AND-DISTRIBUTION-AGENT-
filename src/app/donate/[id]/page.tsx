@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { DisasterBadge } from '@/components/Badges';
+import DistributionTimeline from '@/components/DistributionTimeline';
 
 const PRESETS = [500, 1000, 2500, 5000];
 
@@ -10,6 +11,7 @@ export default function DonateFormPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [request, setRequest] = useState<any>(null);
+  const [distributions, setDistributions] = useState<any[]>([]);
   const [amount, setAmount] = useState(2500);
   const [customAmount, setCustomAmount] = useState('');
   const [method, setMethod] = useState('Credit/Debit Card');
@@ -23,6 +25,10 @@ export default function DonateFormPage() {
     fetch(`/api/requests/${id}`)
       .then((r) => r.json())
       .then(setRequest);
+    // Transparency: the API only returns admin-verified distributions to the public.
+    fetch(`/api/requests/${id}/distributions`)
+      .then((r) => r.json())
+      .then((d) => setDistributions(Array.isArray(d) ? d : []));
   }, [id]);
 
   async function confirmDonation() {
@@ -195,19 +201,43 @@ export default function DonateFormPage() {
               className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition bg-white dark:bg-slate-900 resize-none"
             />
           </div>
+
+          {distributions.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <iconify-icon icon="solar:box-minimalistic-linear" class="text-brand-teal"></iconify-icon>
+                <h3 className="text-sm font-semibold text-slate-900">Where the aid went</h3>
+                <span className="text-[10px] uppercase font-semibold text-[#0F6E56] bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                  Admin Verified
+                </span>
+              </div>
+              <DistributionTimeline distributions={distributions} />
+            </div>
+          )}
         </div>
 
         <div className="p-5 border-t border-slate-200 bg-slate-50">
-          <button
-            onClick={confirmDonation}
-            disabled={submitting}
-            className="w-full bg-brand-teal text-white py-3 rounded-xl font-medium hover:bg-brand-teal/90 transition shadow-sm text-base flex items-center justify-center gap-2 mb-3 disabled:opacity-60"
-          >
-            {submitting ? 'Processing…' : 'Confirm Donation'} <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
-          </button>
-          <p className="text-center text-xs text-slate-500 flex justify-center items-center gap-1">
-            <iconify-icon icon="solar:shield-check-linear"></iconify-icon> This is a demo checkout — no real payment is processed.
-          </p>
+          {request.status === 'fulfilled' ? (
+            <div className="text-center">
+              <div className="bg-blue-50 border border-blue-200 text-brand-blue rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-center gap-2">
+                <iconify-icon icon="solar:check-circle-bold"></iconify-icon>
+                This request has been fully fulfilled — thank you to everyone who donated!
+              </div>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={confirmDonation}
+                disabled={submitting}
+                className="w-full bg-brand-teal text-white py-3 rounded-xl font-medium hover:bg-brand-teal/90 transition shadow-sm text-base flex items-center justify-center gap-2 mb-3 disabled:opacity-60"
+              >
+                {submitting ? 'Processing…' : 'Confirm Donation'} <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+              </button>
+              <p className="text-center text-xs text-slate-500 flex justify-center items-center gap-1">
+                <iconify-icon icon="solar:shield-check-linear"></iconify-icon> This is a demo checkout — no real payment is processed.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

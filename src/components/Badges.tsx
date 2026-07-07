@@ -61,3 +61,19 @@ export function DisasterBadge({ type }: { type?: string }) {
     </span>
   );
 }
+
+export function DistributionBadge({ status }: { status: string }) {
+  const verified = status === 'verified';
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border ${
+        verified
+          ? 'text-[#0F6E56] bg-emerald-50 border-emerald-200'
+          : 'text-[#BA7517] bg-[#BA7517]/10 border-[#BA7517]/20'
+      }`}
+    >
+      <iconify-icon icon={verified ? 'solar:verified-check-bold' : 'solar:clock-circle-linear'}></iconify-icon>
+      {verified ? 'Verified' : 'Awaiting Verification'}
+    </span>
+  );
+}

@@ -50,6 +50,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ id: user._id, email: user.email, role: user.role }, { status: 201 });
   } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      const first = err.errors[0];
+      const field = first?.path?.join('.') || 'input';
+      return NextResponse.json({ error: `Invalid ${field}: ${first?.message || 'check your input.'}` }, { status: 400 });
+    }
     return NextResponse.json({ error: err.message || 'Registration failed' }, { status: 400 });
   }
 }

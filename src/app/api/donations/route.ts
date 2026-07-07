@@ -43,6 +43,18 @@ export async function POST(req: Request) {
 
   const relief = await ReliefRequest.findById(data.requestId);
   if (!relief) return NextResponse.json({ error: 'Request not found' }, { status: 404 });
+  // Donations only flow to admin-approved, still-open requests.
+  if (relief.status !== 'approved') {
+    return NextResponse.json(
+      {
+        error:
+          relief.status === 'fulfilled'
+            ? 'This request has already been fulfilled — no further donations are needed.'
+            : 'Donations can only be made to approved requests.'
+      },
+      { status: 400 }
+    );
+  }
 
   const donation = await Donation.create({
     request: relief._id,

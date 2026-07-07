@@ -7,7 +7,8 @@ const typeColor: Record<string, string> = {
   donation: 'text-brand-blue',
   ai: 'text-brand-amber',
   submit: 'text-slate-600',
-  rejection: 'text-brand-rust'
+  rejection: 'text-brand-rust',
+  distribution: 'text-brand-teal'
 };
 
 export default function AdminLogsPage() {

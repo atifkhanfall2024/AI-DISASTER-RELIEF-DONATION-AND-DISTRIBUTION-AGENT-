@@ -3,20 +3,45 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { UrgencyBadge, DisasterBadge } from '@/components/Badges';
+import DistributionTimeline from '@/components/DistributionTimeline';
 
 export default function AdminRequestDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [request, setRequest] = useState<any>(null);
+  const [distributions, setDistributions] = useState<any[]>([]);
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState(false);
   const [reanalyzing, setReanalyzing] = useState(false);
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
 
   async function load() {
-    const res = await fetch(`/api/requests/${id}`);
+    const [res, distRes] = await Promise.all([
+      fetch(`/api/requests/${id}`),
+      fetch(`/api/requests/${id}/distributions`)
+    ]);
     const data = await res.json();
     setRequest(data);
     setNotes(data.adminNotes || '');
+    const dists = await distRes.json();
+    setDistributions(Array.isArray(dists) ? dists : []);
+  }
+
+  async function verifyDistribution(distId: string) {
+    setVerifyingId(distId);
+    try {
+      const res = await fetch(`/api/distributions/${distId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify' })
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      await load(); // refresh both — verifying a final delivery can fulfill the request
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setVerifyingId(null);
+    }
   }
 
   useEffect(() => {
@@ -145,6 +170,23 @@ export default function AdminRequestDetail() {
               ) : (
                 <div className="relative z-10 text-sm font-medium text-slate-400">No location data submitted</div>
               )}
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-200 p-5">
+              <h3 className="text-base font-semibold text-slate-900 mb-1 flex items-center gap-2">
+                <iconify-icon icon="solar:box-minimalistic-linear" class="text-brand-teal"></iconify-icon>
+                Aid Distribution Timeline
+              </h3>
+              <p className="text-xs text-slate-500 mb-4">
+                Deliveries recorded by the focal person. Verify each record to publish it to donors; verifying a
+                delivery marked <em>final</em> fulfills the request.
+              </p>
+              <DistributionTimeline
+                distributions={distributions}
+                onVerify={verifyDistribution}
+                verifyingId={verifyingId}
+                emptyText="No distributions recorded for this request yet."
+              />
             </div>
           </div>
 
