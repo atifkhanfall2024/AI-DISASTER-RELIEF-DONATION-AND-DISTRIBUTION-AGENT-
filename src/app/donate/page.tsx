@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { DisasterBadge } from '@/components/Badges';
+import { DisasterBadge, PriorityBadge } from '@/components/Badges';
+import SmartDonate from '@/components/SmartDonate';
 
 export default function DonateBrowsePage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [urgency, setUrgency] = useState('all');
-  const [sort, setSort] = useState('urgent');
+  const [sort, setSort] = useState('priority');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +22,8 @@ export default function DonateBrowsePage() {
       .then((data) => {
         const order: any = { critical: 4, high: 3, medium: 2, low: 1 };
         let sorted = [...data];
-        if (sort === 'urgent') sorted.sort((a, b) => order[b.urgency] - order[a.urgency]);
+        if (sort === 'priority') sorted.sort((a, b) => (b.priority?.rpi || 0) - (a.priority?.rpi || 0));
+        else if (sort === 'urgent') sorted.sort((a, b) => order[b.urgency] - order[a.urgency]);
         else if (sort === 'recent') sorted.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
         else if (sort === 'families') sorted.sort((a, b) => b.familiesAffected - a.familiesAffected);
         setRequests(sorted);
@@ -41,8 +43,14 @@ export default function DonateBrowsePage() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 text-center max-w-2xl mx-auto">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900 mb-3">Fund Verified Needs</h1>
-          <p className="text-slate-500 text-base">Browse AI-verified requests and provide direct relief to affected communities. 100% transparent.</p>
+          <p className="text-slate-500 text-base">
+            Browse AI-verified requests, or let our priority engine send your donation where it&apos;s needed most.
+            100% transparent.
+          </p>
         </div>
+
+        {/* Smart Donate — the intelligence layer's headline donor feature */}
+        <SmartDonate />
 
         <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] flex flex-wrap gap-3 items-center justify-between mb-8">
           <div className="flex gap-3 flex-wrap flex-1">
@@ -74,6 +82,7 @@ export default function DonateBrowsePage() {
               onChange={(e) => setSort(e.target.value)}
               className="border-none font-medium text-brand-blue bg-transparent focus:outline-none cursor-pointer"
             >
+              <option value="priority">Relief Priority</option>
               <option value="urgent">Most Urgent</option>
               <option value="recent">Most Recent</option>
               <option value="families">Most Families</option>
@@ -82,11 +91,14 @@ export default function DonateBrowsePage() {
         </div>
 
         {loading && <p className="text-slate-400 text-center">Loading requests…</p>}
-        {!loading && requests.length === 0 && <p className="text-slate-400 text-center">No approved requests match these filters yet.</p>}
+        {!loading && requests.length === 0 && (
+          <p className="text-slate-400 text-center">No approved requests match these filters yet.</p>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {requests.map((r) => {
-            const pct = r.donationGoal ? Math.min(100, Math.round((r.donationRaised / r.donationGoal) * 100)) : 0;
+            const pct = r.priority?.fundedPct ?? 0;
+            const remaining = r.priority?.remaining ?? 0;
             return (
               <Link
                 key={r._id}
@@ -98,28 +110,44 @@ export default function DonateBrowsePage() {
                   <div className="absolute top-3 left-3 bg-white/90 rounded-md shadow-sm">
                     <DisasterBadge type={r.disasterType} />
                   </div>
-                  <div className={`absolute top-3 right-3 text-white text-[10px] font-semibold px-2 py-1 rounded-md backdrop-blur-sm border uppercase tracking-wider flex items-center gap-1 shadow-sm ${urgencyBadgeStyle[r.urgency]}`}>
+                  <div
+                    className={`absolute top-3 right-3 text-white text-[10px] font-semibold px-2 py-1 rounded-md backdrop-blur-sm border uppercase tracking-wider flex items-center gap-1 shadow-sm ${urgencyBadgeStyle[r.urgency]}`}
+                  >
                     {r.urgency}
                   </div>
+                  {r.priority && (
+                    <div className="absolute bottom-3 left-3 bg-white/95 rounded-md shadow-sm">
+                      <PriorityBadge rpi={r.priority.rpi} />
+                    </div>
+                  )}
                 </div>
                 <div className="p-5 flex-1 flex flex-col">
                   <h3 className="font-semibold text-slate-900 text-lg leading-tight group-hover:text-brand-teal transition mb-2">
-                    {r.area}{r.district ? `, ${r.district}` : ''}
+                    {r.area}
+                    {r.district ? `, ${r.district}` : ''}
                   </h3>
                   <div className="text-sm text-slate-500 mb-4 flex items-center gap-2 border-b border-slate-100 pb-4">
-                    <iconify-icon icon="solar:users-group-two-rounded-linear"></iconify-icon> {r.familiesAffected} Families Affected
+                    <iconify-icon icon="solar:users-group-two-rounded-linear"></iconify-icon> {r.familiesAffected} Families
+                    Affected
                   </div>
                   <div className="mb-4 flex-1">
                     <div className="text-xs text-slate-500 font-medium mb-1.5">Verified Needs:</div>
                     <div className="flex flex-wrap gap-1.5">
                       {r.items?.slice(0, 3).map((i: string) => (
-                        <span key={i} className="px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded text-[11px] font-medium">{i}</span>
+                        <span
+                          key={i}
+                          className="px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded text-[11px] font-medium"
+                        >
+                          {i}
+                        </span>
                       ))}
                     </div>
                   </div>
                   <div className="mb-4">
                     <div className="flex justify-between text-xs font-medium mb-1">
-                      <span className="text-slate-500">Donation Goal</span>
+                      <span className="text-slate-500">
+                        {remaining > 0 ? `PKR ${remaining.toLocaleString()} still needed` : 'Fully funded'}
+                      </span>
                       <span className="text-brand-teal">{pct}% Funded</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">

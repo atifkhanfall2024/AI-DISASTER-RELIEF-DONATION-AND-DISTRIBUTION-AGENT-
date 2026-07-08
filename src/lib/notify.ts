@@ -173,6 +173,37 @@ export async function notifyDonationReceived(input: {
   }
 }
 
+/** Smart/general fund donation → one summary receipt showing how it was split. */
+export async function notifyFundDonation(input: {
+  donorEmail: string;
+  donorName: string;
+  total: number;
+  kind: 'smart' | 'general';
+  legs: { area: string; amount: number; receiptNo: string }[];
+}) {
+  try {
+    const breakdown = rows(
+      input.legs.map((l) => [`${l.area} · ${l.receiptNo}`, `PKR ${l.amount.toLocaleString()}`] as [string, string])
+    );
+    const intro =
+      input.kind === 'general'
+        ? `Your General Relief Fund donation was automatically allocated by our priority engine to the areas that need it most:`
+        : `Your donation was smart-allocated across the highest-priority underfunded needs:`;
+    await sendMany(
+      [input.donorEmail],
+      `Donation receipt — PKR ${input.total.toLocaleString()} allocated to ${input.legs.length} area(s)`,
+      `Thank you ${input.donorName}! Your PKR ${input.total.toLocaleString()} was allocated across ${input.legs.length} relief request(s).`,
+      shell(
+        'Thank you — your donation is on its way',
+        `<p>${intro}</p>${breakdown}<p style="margin-top:12px;color:#64748b">Total: <strong>PKR ${input.total.toLocaleString()}</strong> across ${input.legs.length} area(s).</p>`,
+        { label: 'View Donation History', url: `${APP_URL}/donate/history` }
+      )
+    );
+  } catch (err) {
+    console.error('notifyFundDonation failed:', err);
+  }
+}
+
 /** Request fulfilled (final verified delivery) → close the loop with focal + every donor. */
 export async function notifyRequestFulfilled(request: IReliefRequest) {
   try {

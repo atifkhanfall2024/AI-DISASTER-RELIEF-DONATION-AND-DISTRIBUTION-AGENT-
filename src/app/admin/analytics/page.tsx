@@ -56,6 +56,7 @@ function useIsDark() {
 
 export default function AdminAnalyticsPage() {
   const [data, setData] = useState<any>(null);
+  const [priority, setPriority] = useState<any[]>([]);
   const [error, setError] = useState('');
   const dark = useIsDark();
   const C = dark ? PALETTE.dark : PALETTE.light;
@@ -72,6 +73,9 @@ export default function AdminAnalyticsPage() {
     fetch('/api/analytics')
       .then((r) => r.json())
       .then((d) => (d.error ? setError(d.error) : setData(d)));
+    fetch('/api/priority')
+      .then((r) => r.json())
+      .then((d) => setPriority(Array.isArray(d) ? d : []));
   }, []);
 
   if (error) return <div className="p-8 text-red-600">{error}</div>;
@@ -242,6 +246,58 @@ export default function AdminAnalyticsPage() {
                 />
               </AreaChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Relief Priority Index — where the next donation should go */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+          <div className="p-5 border-b border-slate-100">
+            <h2 className="font-semibold text-slate-900 text-base flex items-center gap-2">
+              <iconify-icon icon="solar:ranking-linear" class="text-brand-teal"></iconify-icon>
+              Top Priority Needs
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Open requests ranked by the Relief Priority Index (urgency, scale, AI credibility, funding gap, age).
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left whitespace-nowrap text-sm">
+              <thead className="bg-slate-50 text-slate-500 font-medium text-xs uppercase tracking-wider border-b border-slate-100">
+                <tr>
+                  <th className="px-5 py-3">#</th>
+                  <th className="px-5 py-3">Area</th>
+                  <th className="px-5 py-3">Urgency</th>
+                  <th className="px-5 py-3">Families</th>
+                  <th className="px-5 py-3">Funded</th>
+                  <th className="px-5 py-3">Still Needed</th>
+                  <th className="px-5 py-3">RPI</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {priority.length === 0 && (
+                  <tr><td className="px-5 py-6 text-slate-400" colSpan={7}>No open requests to prioritize.</td></tr>
+                )}
+                {priority.map((p, i) => (
+                  <tr key={p._id} className="hover:bg-slate-50 transition">
+                    <td className="px-5 py-3 text-slate-400 font-medium">{i + 1}</td>
+                    <td className="px-5 py-3 font-medium text-slate-900">
+                      <Link href={`/admin/requests/${p._id}`} className="hover:text-brand-teal transition">
+                        {p.area}{p.district ? `, ${p.district}` : ''}
+                      </Link>
+                    </td>
+                    <td className="px-5 py-3 capitalize text-slate-600">{p.urgency}</td>
+                    <td className="px-5 py-3 text-slate-600">{p.familiesAffected}</td>
+                    <td className="px-5 py-3 text-slate-600">{p.fundedPct}%</td>
+                    <td className="px-5 py-3 text-slate-600">PKR {p.remaining.toLocaleString()}</td>
+                    <td className="px-5 py-3">
+                      <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-md text-xs font-semibold bg-brand-teal/10 text-brand-teal border border-brand-teal/20">
+                        {p.rpi}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 

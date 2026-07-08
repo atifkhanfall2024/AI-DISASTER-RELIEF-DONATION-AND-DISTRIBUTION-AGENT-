@@ -7,6 +7,7 @@ import ReliefRequest from '@/lib/models/Request';
 import Log from '@/lib/models/Log';
 import { analyzeRequest } from '@/lib/gemini';
 import { notifyRequestSubmitted } from '@/lib/notify';
+import { withPriority } from '@/lib/priority';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +68,8 @@ export async function GET(req: Request) {
     .sort({ createdAt: -1 })
     .lean();
 
-  return NextResponse.json(requests);
+  // Attach the Relief Priority Index + funding gap so lists can rank/So show it.
+  return NextResponse.json(requests.map((r: any) => withPriority(r)));
 }
 
 // POST /api/requests -> focal person submits a new request, triggers Gemini AI analysis

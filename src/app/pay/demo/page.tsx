@@ -85,6 +85,22 @@ function DemoGatewayContent() {
               <span className="text-slate-500">Donor</span>
               <span className="font-medium text-slate-900">{payment.donorName}</span>
             </div>
+            {payment.kind !== 'direct' && payment.allocations?.length > 0 && (
+              <div className="border-t border-slate-100 pt-3">
+                <div className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+                  <iconify-icon icon="solar:bolt-linear" class="text-brand-teal"></iconify-icon>
+                  Smart-allocated across {payment.allocations.length} area(s)
+                </div>
+                <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                  {payment.allocations.map((a: any, i: number) => (
+                    <div key={i} className="flex justify-between text-xs">
+                      <span className="text-slate-600">{a.area}</span>
+                      <span className="font-medium text-slate-900">PKR {Number(a.amount).toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="flex justify-between items-center border-t border-slate-100 pt-4">
               <span className="text-slate-500 text-sm">Amount</span>
               <span className="text-2xl font-bold text-slate-900">PKR {Number(payment.amount).toLocaleString()}</span>

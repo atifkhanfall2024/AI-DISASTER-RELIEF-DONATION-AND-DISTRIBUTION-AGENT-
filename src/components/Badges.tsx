@@ -62,6 +62,27 @@ export function DisasterBadge({ type }: { type?: string }) {
   );
 }
 
+export function PriorityBadge({ rpi }: { rpi: number }) {
+  // RPI 0-100 → tiered label. Higher = the next donation should go here.
+  const tier =
+    rpi >= 75
+      ? { label: 'Top Priority', cls: 'text-[#993C1D] bg-[#993C1D]/10 border-[#993C1D]/20' }
+      : rpi >= 55
+      ? { label: 'High Priority', cls: 'text-[#BA7517] bg-[#BA7517]/10 border-[#BA7517]/20' }
+      : rpi >= 35
+      ? { label: 'Moderate', cls: 'text-[#185FA5] bg-blue-50 border-blue-200' }
+      : { label: 'Lower', cls: 'text-slate-600 bg-slate-100 border-slate-200' };
+  return (
+    <span
+      title={`Relief Priority Index: ${rpi}/100`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border ${tier.cls}`}
+    >
+      <iconify-icon icon="solar:ranking-linear"></iconify-icon>
+      {tier.label} · {rpi}
+    </span>
+  );
+}
+
 export function DistributionBadge({ status }: { status: string }) {
   const verified = status === 'verified';
   return (

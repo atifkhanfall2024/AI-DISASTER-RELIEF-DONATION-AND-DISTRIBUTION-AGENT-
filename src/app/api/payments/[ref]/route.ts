@@ -19,7 +19,14 @@ export async function GET(_req: Request, { params }: { params: { ref: string } }
     donorName: payment.donorName,
     method: payment.method,
     status: payment.status,
-    requestArea: payment.request ? `${payment.request.area}${payment.request.district ? ', ' + payment.request.district : ''}` : ''
+    kind: payment.kind,
+    requestArea:
+      payment.kind === 'direct' && payment.request
+        ? `${payment.request.area}${payment.request.district ? ', ' + payment.request.district : ''}`
+        : payment.kind === 'general'
+        ? 'General Relief Fund'
+        : 'Highest-priority needs',
+    allocations: (payment.allocations || []).map((a: any) => ({ area: a.requestArea, amount: a.amount }))
   });
 }
 
@@ -55,10 +62,12 @@ export async function POST(req: Request, { params }: { params: { ref: string } }
     payment.gatewayTxnId = `DEMO-${Date.now()}`;
     payment.gatewayResponse = '000 Demo payment approved';
     await payment.save();
-    const donation = await completeDonationFromPayment(payment);
-    return NextResponse.json({
-      redirect: `/donate/result?status=paid&ref=${payment.txnRef}&receipt=${donation.receiptNo}&request=${payment.request}`
-    });
+    const settled = await completeDonationFromPayment(payment);
+    const first = settled[0];
+    const qs = new URLSearchParams({ status: 'paid', ref: payment.txnRef, split: String(settled.length) });
+    if (first) qs.set('receipt', first.receiptNo);
+    if (payment.kind === 'direct' && payment.request) qs.set('request', String(payment.request));
+    return NextResponse.json({ redirect: `/donate/result?${qs.toString()}` });
   } catch (err: any) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: 'Invalid outcome.' }, { status: 400 });

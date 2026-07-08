@@ -46,8 +46,11 @@ export async function POST(req: Request) {
 
     payment.status = 'paid';
     await payment.save();
-    const donation = await completeDonationFromPayment(payment);
-    return resultUrl(`status=paid&ref=${txnRef}&receipt=${donation.receiptNo}&request=${payment.request}`);
+    const settled = await completeDonationFromPayment(payment);
+    const qs = new URLSearchParams({ status: 'paid', ref: txnRef, split: String(settled.length) });
+    if (settled[0]) qs.set('receipt', settled[0].receiptNo);
+    if (payment.kind === 'direct' && payment.request) qs.set('request', String(payment.request));
+    return resultUrl(qs.toString());
   } catch (err: any) {
     console.error('Payment callback error:', err);
     return resultUrl('status=failed&reason=server-error');

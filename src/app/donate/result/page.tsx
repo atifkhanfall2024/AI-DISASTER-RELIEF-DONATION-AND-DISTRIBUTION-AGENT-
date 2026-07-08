@@ -19,6 +19,7 @@ function PaymentResultContent() {
   const receipt = params.get('receipt') || '';
   const requestId = params.get('request') || '';
   const reason = params.get('reason') || '';
+  const split = parseInt(params.get('split') || '1', 10);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -37,11 +38,16 @@ function PaymentResultContent() {
         {paid ? (
           <>
             <h1 className="text-xl font-semibold text-slate-900 mb-2">Payment successful — thank you!</h1>
-            <p className="text-slate-500 mb-4">Your donation has been recorded and will reach verified needs.</p>
+            <p className="text-slate-500 mb-4">
+              {split > 1
+                ? `Your donation was smart-allocated across ${split} high-priority areas.`
+                : 'Your donation has been recorded and will reach verified needs.'}
+            </p>
             {receipt && (
               <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 mb-6 text-sm">
-                <span className="text-slate-500">Receipt No: </span>
+                <span className="text-slate-500">{split > 1 ? 'First receipt: ' : 'Receipt No: '}</span>
                 <span className="font-mono font-semibold text-slate-800">{receipt}</span>
+                {split > 1 && <span className="text-slate-400"> (+{split - 1} more in your history)</span>}
               </div>
             )}
           </>
