@@ -153,6 +153,37 @@ export default function AdminRequestDetail() {
               </div>
             </div>
 
+            {request.nearbyDuplicates?.length > 0 && (
+              <div className="bg-[#993C1D]/5 rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-[#993C1D]/20 p-5">
+                <h3 className="text-base font-semibold text-brand-rust mb-1 flex items-center gap-2">
+                  <iconify-icon icon="solar:shield-warning-bold"></iconify-icon>
+                  Possible Duplicate Reports
+                </h3>
+                <p className="text-xs text-slate-500 mb-3">
+                  Recent same-disaster requests near this location (by GPS distance) — review for overlap before
+                  approving.
+                </p>
+                <div className="space-y-2">
+                  {request.nearbyDuplicates.map((d: any) => (
+                    <div
+                      key={d.request}
+                      className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 rounded-lg px-3 py-2"
+                    >
+                      <a
+                        href={`/admin/requests/${d.request}`}
+                        className="text-sm font-medium text-slate-800 hover:text-brand-teal transition"
+                      >
+                        {d.area}
+                      </a>
+                      <span className="text-xs font-medium text-brand-rust">
+                        {d.distanceKm >= 0 ? `${d.distanceKm} km away` : 'name match'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {request.images?.length > 0 && (
               <div className="bg-white dark:bg-slate-900 rounded-xl shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] border border-slate-200 p-5">
                 <h3 className="text-base font-semibold text-slate-900 mb-4">Photographic Evidence</h3>

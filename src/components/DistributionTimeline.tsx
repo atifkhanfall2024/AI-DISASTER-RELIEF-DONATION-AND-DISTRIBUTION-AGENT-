@@ -73,6 +73,23 @@ export default function DistributionTimeline({
           )}
           {d.notes && <p className="text-xs text-slate-600 mb-2 leading-relaxed">{d.notes}</p>}
 
+          {(d.beneficiaryCnics?.length > 0 || d.flaggedBeneficiaries?.length > 0) && (
+            <div className="text-xs mb-2 flex flex-wrap items-center gap-2">
+              {d.beneficiaryCnics?.length > 0 && (
+                <span className="text-slate-500 flex items-center gap-1">
+                  <iconify-icon icon="solar:users-group-rounded-linear"></iconify-icon>
+                  {d.beneficiaryCnics.length} beneficiary CNIC(s) recorded
+                </span>
+              )}
+              {d.flaggedBeneficiaries?.length > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-medium border text-[#993C1D] bg-[#993C1D]/10 border-[#993C1D]/20">
+                  <iconify-icon icon="solar:shield-warning-bold"></iconify-icon>
+                  {d.flaggedBeneficiaries.length} possible duplicate aid
+                </span>
+              )}
+            </div>
+          )}
+
           {d.proofImages?.length > 0 && (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2">
               {d.proofImages.map((img: string) => (

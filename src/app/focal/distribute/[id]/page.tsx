@@ -23,11 +23,13 @@ export default function RecordDistributionPage() {
   const [amountSpent, setAmountSpent] = useState('');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+  const [cnics, setCnics] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [isFinal, setIsFinal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const [flagged, setFlagged] = useState(0);
 
   useEffect(() => {
     if (sessionStatus === 'unauthenticated') router.push('/login');
@@ -81,11 +83,18 @@ export default function RecordDistributionPage() {
           location: location || undefined,
           notes: notes || undefined,
           proofImages,
+          beneficiaryCnics: cnics
+            .split(/[\n,]/)
+            .map((c) => c.trim())
+            .filter(Boolean),
           isFinal
         })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      if (data.flaggedBeneficiaries?.length) {
+        setFlagged(data.flaggedBeneficiaries.length);
+      }
       setDone(true);
     } catch (err: any) {
       setError(err.message || 'Something went wrong.');
@@ -111,6 +120,15 @@ export default function RecordDistributionPage() {
           Your delivery record for request #{request._id.slice(-6).toUpperCase()} has been submitted and is
           awaiting admin verification.{isFinal && ' Once verified, this request will be marked fulfilled.'}
         </p>
+        {flagged > 0 && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-3 mb-6 text-sm text-left flex items-start gap-2">
+            <iconify-icon icon="solar:shield-warning-bold" class="text-lg shrink-0 mt-0.5"></iconify-icon>
+            <span>
+              <strong>{flagged}</strong> beneficiary CNIC(s) in this record already received aid in another
+              distribution. The admin will review these for possible duplicate aid.
+            </span>
+          </div>
+        )}
         <div className="flex justify-center gap-3">
           <button
             onClick={() => {
@@ -269,6 +287,23 @@ export default function RecordDistributionPage() {
                 placeholder="Anything the admin or donors should know about this delivery..."
                 className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition bg-white dark:bg-slate-900 resize-none"
               />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                Beneficiary CNICs <span className="text-slate-400 font-normal">(optional — one per line or comma-separated)</span>
+              </label>
+              <textarea
+                value={cnics}
+                onChange={(e) => setCnics(e.target.value)}
+                rows={3}
+                placeholder="e.g. 12345-6789012-3, 34567-8901234-5"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition bg-white dark:bg-slate-900 resize-none font-mono"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                Recording CNICs lets the system flag families who already received aid elsewhere — preventing
+                duplicate distribution.
+              </p>
             </div>
 
             <div>

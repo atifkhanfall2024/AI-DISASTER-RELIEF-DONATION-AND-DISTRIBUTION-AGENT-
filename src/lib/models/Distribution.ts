@@ -21,6 +21,8 @@ export interface IDistribution {
   location?: string;
   notes?: string;
   proofImages: string[];
+  beneficiaryCnics: string[]; // normalized CNICs of families who received aid
+  flaggedBeneficiaries: string[]; // CNICs that already received aid elsewhere (double-dip)
   status: DistributionStatus;
   verifiedBy?: Types.ObjectId;
   verifiedAt?: Date;
@@ -46,6 +48,8 @@ const DistributionSchema = new Schema<IDistribution>(
     location: String,
     notes: String,
     proofImages: [{ type: String }],
+    beneficiaryCnics: [{ type: String }],
+    flaggedBeneficiaries: [{ type: String }],
     status: { type: String, enum: ['recorded', 'verified'], default: 'recorded' },
     verifiedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     verifiedAt: Date,

@@ -8,6 +8,7 @@ import Log from '@/lib/models/Log';
 import { analyzeRequest } from '@/lib/gemini';
 import { notifyRequestSubmitted } from '@/lib/notify';
 import { withPriority } from '@/lib/priority';
+import { findNearbyOverlaps } from '@/lib/geo';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,20 +85,34 @@ export async function POST(req: Request) {
     const data = createSchema.parse(body);
     await connectDB();
 
-    // Find recent nearby requests (naive duplicate-detection context for the AI)
-    const since = new Date(Date.now() - 48 * 60 * 60 * 1000);
-    const nearby = await ReliefRequest.find({
-      area: { $regex: data.area, $options: 'i' },
-      createdAt: { $gte: since }
+    // Geographic duplicate detection: pull recent same-disaster requests and
+    // cluster by real GPS distance (Haversine) instead of a naive name match.
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recent = await ReliefRequest.find({
+      createdAt: { $gte: since },
+      status: { $ne: 'rejected' }
     })
-      .select('area createdAt familiesAffected')
-      .limit(5)
+      .select('area district disasterType lat lng createdAt familiesAffected')
+      .limit(200)
       .lean();
+
+    const overlaps = findNearbyOverlaps(
+      { area: data.area, district: data.district, disasterType: data.disasterType, lat: data.lat, lng: data.lng },
+      recent as any[],
+      { radiusKm: 25, withinDays: 7 }
+    );
+    // Context the AI uses for its own duplicate judgement.
+    const nearby = recent.filter((r: any) => overlaps.some((o) => o.request === String(r._id)));
 
     const request = await ReliefRequest.create({
       focal: session.user.id,
       ...data,
-      status: 'pending'
+      status: 'pending',
+      nearbyDuplicates: overlaps.slice(0, 5).map((o) => ({
+        request: o.request,
+        area: o.area,
+        distanceKm: o.distanceKm
+      }))
     });
 
     await Log.create({
@@ -129,6 +144,17 @@ export async function POST(req: Request) {
     request.aiFlags = analysis.flags;
     request.aiReasoning = analysis.reasoning;
     request.aiRecommendation = analysis.recommendation;
+
+    // Deterministic geo flag: a request within 5km of a recent same-disaster
+    // report is flagged regardless of the AI's own judgement.
+    const nearest = overlaps.find((o) => o.distanceKm >= 0);
+    if (nearest && nearest.distanceKm <= 5) {
+      const flag = `Possible Duplicate (${nearest.distanceKm}km from ${nearest.area})`;
+      if (!request.aiFlags.some((f: string) => f.toLowerCase().includes('duplicate'))) {
+        request.aiFlags = [...request.aiFlags, flag];
+      }
+    }
+
     request.status = 'needs_approval';
     await request.save();
 

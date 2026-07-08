@@ -34,6 +34,8 @@ export interface IReliefRequest {
   adminNotes?: string;
   donationGoal: number;
   donationRaised: number;
+  // Geo/duplicate detection: nearby recent requests of the same disaster type.
+  nearbyDuplicates: { request: Types.ObjectId; area: string; distanceKm: number }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,7 +69,15 @@ const RequestSchema = new Schema<IReliefRequest>(
     aiRecommendation: { type: String, enum: ['approve', 'reject', 'review'] },
     adminNotes: String,
     donationGoal: { type: Number, default: 100000 },
-    donationRaised: { type: Number, default: 0 }
+    donationRaised: { type: Number, default: 0 },
+    nearbyDuplicates: [
+      {
+        _id: false,
+        request: { type: Schema.Types.ObjectId, ref: 'ReliefRequest' },
+        area: String,
+        distanceKm: Number
+      }
+    ]
   },
   { timestamps: true }
 );

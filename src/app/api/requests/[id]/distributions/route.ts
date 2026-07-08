@@ -6,6 +6,7 @@ import { connectDB } from '@/lib/mongodb';
 import ReliefRequest from '@/lib/models/Request';
 import Distribution from '@/lib/models/Distribution';
 import Log from '@/lib/models/Log';
+import { normalizeCnic } from '@/lib/geo';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,7 @@ const createSchema = z.object({
   location: z.string().optional(),
   notes: z.string().optional(),
   proofImages: z.array(z.string()).default([]),
+  beneficiaryCnics: z.array(z.string()).default([]),
   isFinal: z.boolean().default(false)
 });
 
@@ -34,11 +36,20 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 
   const role = session?.user?.role;
   const isOwner = role === 'focal' && request.focal?.toString() === session?.user?.id;
+  const privileged = role === 'admin' || isOwner;
   const filter: any = { request: params.id };
-  if (role !== 'admin' && !isOwner) filter.status = 'verified';
+  if (!privileged) filter.status = 'verified';
 
   const distributions = await Distribution.find(filter).sort({ createdAt: -1 }).lean();
-  return NextResponse.json(distributions);
+
+  // Beneficiary CNICs are PII — never expose the raw values (or the flag detail)
+  // to the public/donors; keep them for admins and the request's own focal person.
+  const safe = distributions.map((d: any) => {
+    if (privileged) return d;
+    const { beneficiaryCnics, flaggedBeneficiaries, ...rest } = d;
+    return rest;
+  });
+  return NextResponse.json(safe);
 }
 
 // POST /api/requests/:id/distributions -> focal person (owner) or admin records an
@@ -85,12 +96,37 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       }
     }
 
+    // Beneficiary deduplication: normalize the CNICs and flag any that already
+    // received aid in a prior distribution anywhere on the platform (double-dip).
+    const cnics = Array.from(new Set(data.beneficiaryCnics.map(normalizeCnic).filter((c) => c.length >= 5)));
+    let flaggedBeneficiaries: string[] = [];
+    if (cnics.length) {
+      const prior = await Distribution.find({ beneficiaryCnics: { $in: cnics } })
+        .select('beneficiaryCnics')
+        .lean();
+      const seen = new Set<string>();
+      prior.forEach((d: any) => (d.beneficiaryCnics || []).forEach((c: string) => seen.add(c)));
+      flaggedBeneficiaries = cnics.filter((c) => seen.has(c));
+    }
+
     const distribution = await Distribution.create({
       request: request._id,
       distributedBy: session.user.id,
       distributorName: session.user.name || 'Focal User',
-      ...data
+      ...data,
+      beneficiaryCnics: cnics,
+      flaggedBeneficiaries
     });
+
+    if (flaggedBeneficiaries.length) {
+      await Log.create({
+        actorName: 'System Integrity Check',
+        actorType: 'system',
+        action: `Flagged ${flaggedBeneficiaries.length} beneficiary CNIC(s) as possible duplicate aid`,
+        type: 'distribution',
+        relatedId: `#${request._id.toString().slice(-6).toUpperCase()}`
+      });
+    }
 
     await Log.create({
       actorName: session.user.name || 'Focal User',
