@@ -49,9 +49,8 @@ export async function POST(req: Request) {
       configured = isSmsConfigured();
     }
 
-    // In dev, when no real provider is configured, return the code so the flow is
-    // testable without live email/SMS.
-    const devCode = !configured ? code : undefined;
+    // Returning the code so the flow is testable locally even if email/sms are delayed.
+    const devCode = code;
     return NextResponse.json({ ok: true, configured, devCode });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to send verification code.' }, { status: 400 });

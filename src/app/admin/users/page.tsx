@@ -21,6 +21,7 @@ export default function AdminUsersPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [confirmDialog, setConfirmDialog] = useState<{ id: string; name: string; status: 'approved' | 'rejected' } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -62,8 +63,9 @@ export default function AdminUsersPage() {
     }
   }
 
-  async function setFocalStatus(id: string, status: 'approved' | 'rejected') {
-    if (!confirm(`Are you sure you want to ${status} this focal person?`)) return;
+  async function executeFocalStatus() {
+    if (!confirmDialog) return;
+    const { id, status } = confirmDialog;
     try {
       const res = await fetch(`/api/users/${id}/approve`, {
         method: 'PATCH',
@@ -72,6 +74,7 @@ export default function AdminUsersPage() {
       });
       if (!res.ok) throw new Error(await res.text());
       load();
+      setConfirmDialog(null);
     } catch (err: any) {
       alert(err.message || 'Failed to update status');
     }
@@ -281,10 +284,10 @@ export default function AdminUsersPage() {
                             {u.focalStatus?.toUpperCase() || 'PENDING'}
                           </span>
                           {(u.focalStatus === 'pending' || u.focalStatus === 'rejected') && (
-                            <button onClick={() => setFocalStatus(u._id, 'approved')} className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded hover:bg-emerald-100">Approve</button>
+                            <button onClick={() => setConfirmDialog({ id: u._id, name: u.name, status: 'approved' })} className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded hover:bg-emerald-100">Approve</button>
                           )}
                           {(u.focalStatus === 'pending' || u.focalStatus === 'approved') && (
-                            <button onClick={() => setFocalStatus(u._id, 'rejected')} className="text-xs text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded hover:bg-red-100">Reject</button>
+                            <button onClick={() => setConfirmDialog({ id: u._id, name: u.name, status: 'rejected' })} className="text-xs text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded hover:bg-red-100">Reject</button>
                           )}
                         </div>
                       ) : (
@@ -308,7 +311,39 @@ export default function AdminUsersPage() {
             </table>
           </div>
         </div>
+        </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmDialog && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.2)] max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4 text-slate-900">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${confirmDialog.status === 'approved' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                <iconify-icon icon={confirmDialog.status === 'approved' ? 'solar:check-circle-bold' : 'solar:close-circle-bold'} class="text-xl"></iconify-icon>
+              </div>
+              <h3 className="text-lg font-semibold tracking-tight">Confirm Action</h3>
+            </div>
+            <p className="text-slate-600 text-sm mb-6 leading-relaxed">
+              Are you sure you want to <strong>{confirmDialog.status}</strong> focal person <strong>{confirmDialog.name}</strong>?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmDialog(null)}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeFocalStatus}
+                className={`px-4 py-2 rounded-lg text-sm font-medium text-white transition shadow-sm ${confirmDialog.status === 'approved' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}`}
+              >
+                Yes, {confirmDialog.status}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
