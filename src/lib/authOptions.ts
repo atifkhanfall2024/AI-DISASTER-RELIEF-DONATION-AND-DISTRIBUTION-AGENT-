@@ -41,7 +41,8 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          focalStatus: user.focalStatus
         } as any;
       }
     }),
@@ -72,16 +73,21 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          focalStatus: user.focalStatus
         } as any;
       }
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = (user as any).id;
         token.role = (user as any).role;
+        token.focalStatus = (user as any).focalStatus;
+      }
+      if (trigger === 'update' && session?.focalStatus) {
+        token.focalStatus = session.focalStatus;
       }
       return token;
     },
@@ -89,6 +95,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+        (session.user as any).focalStatus = token.focalStatus;
       }
       return session;
     }

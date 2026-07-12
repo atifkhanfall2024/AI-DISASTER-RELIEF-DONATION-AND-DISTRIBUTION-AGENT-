@@ -62,6 +62,21 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function setFocalStatus(id: string, status: 'approved' | 'rejected') {
+    if (!confirm(`Are you sure you want to ${status} this focal person?`)) return;
+    try {
+      const res = await fetch(`/api/users/${id}/approve`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      load();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update status');
+    }
+  }
+
   const counts = {
     admin: users.filter((u) => u.role === 'admin').length,
     focal: users.filter((u) => u.role === 'focal').length,
@@ -237,16 +252,18 @@ export default function AdminUsersPage() {
                   <th className="px-5 py-3">Name</th>
                   <th className="px-5 py-3">Email</th>
                   <th className="px-5 py-3">Role</th>
+                  <th className="px-5 py-3">Verification (Focal)</th>
+                  <th className="px-5 py-3">Docs</th>
                   <th className="px-5 py-3">Sign-in</th>
                   <th className="px-5 py-3">Joined</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading && (
-                  <tr><td className="px-5 py-6 text-slate-400" colSpan={5}>Loading…</td></tr>
+                  <tr><td className="px-5 py-6 text-slate-400" colSpan={7}>Loading…</td></tr>
                 )}
                 {!loading && users.length === 0 && (
-                  <tr><td className="px-5 py-6 text-slate-400" colSpan={5}>No users found.</td></tr>
+                  <tr><td className="px-5 py-6 text-slate-400" colSpan={7}>No users found.</td></tr>
                 )}
                 {users.map((u) => (
                   <tr key={u._id} className="hover:bg-slate-50 transition">
@@ -256,6 +273,32 @@ export default function AdminUsersPage() {
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${ROLE_STYLES[u.role] || ''}`}>
                         {u.role}
                       </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      {u.role === 'focal' ? (
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-semibold px-2 py-1 rounded ${u.focalStatus === 'approved' ? 'bg-emerald-50 text-emerald-700' : u.focalStatus === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}>
+                            {u.focalStatus?.toUpperCase() || 'PENDING'}
+                          </span>
+                          {(u.focalStatus === 'pending' || u.focalStatus === 'rejected') && (
+                            <button onClick={() => setFocalStatus(u._id, 'approved')} className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded hover:bg-emerald-100">Approve</button>
+                          )}
+                          {(u.focalStatus === 'pending' || u.focalStatus === 'approved') && (
+                            <button onClick={() => setFocalStatus(u._id, 'rejected')} className="text-xs text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded hover:bg-red-100">Reject</button>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
+                      {u.role === 'focal' && u.focalDocs && u.focalDocs.length > 0 ? (
+                        <a href={u.focalDocs[0]} target="_blank" rel="noreferrer" className="text-xs text-brand-blue hover:underline flex items-center gap-1">
+                          <iconify-icon icon="solar:document-linear"></iconify-icon> View Doc
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 text-xs">—</span>
+                      )}
                     </td>
                     <td className="px-5 py-3 text-slate-500">{u.provider === 'google' ? 'Google' : 'Password'}</td>
                     <td className="px-5 py-3 text-slate-500">{new Date(u.createdAt).toLocaleDateString()}</td>

@@ -26,7 +26,7 @@ const QUICK_ITEMS = ['Clean Water', 'Medicine', 'Clothing', 'Tents', 'Food Ratio
 
 export default function SubmitRequestPage() {
   const router = useRouter();
-  const { status: sessionStatus } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
 
   const [area, setArea] = useState('');
   const [district, setDistrict] = useState('');
@@ -150,6 +150,22 @@ export default function SubmitRequestPage() {
         >
           Go to Dashboard
         </button>
+      </div>
+    );
+  }
+
+  // Prevent pending users from viewing the form
+  if (sessionStatus === 'authenticated' && (session as any)?.user?.focalStatus !== 'approved') {
+    return (
+      <div className="min-h-screen py-12 px-4 flex items-center justify-center">
+        <div className="text-center p-8 bg-white rounded-xl shadow border border-slate-200">
+          <iconify-icon icon="solar:lock-keyhole-bold" class="text-4xl text-amber-500 mb-4"></iconify-icon>
+          <h2 className="text-xl font-bold mb-2">Verification Required</h2>
+          <p className="text-slate-500 mb-4">You cannot submit requests until your profile is approved by an admin.</p>
+          <button onClick={() => router.push('/focal/dashboard')} className="bg-slate-900 text-white px-4 py-2 rounded-lg">
+            Return to Dashboard
+          </button>
+        </div>
       </div>
     );
   }

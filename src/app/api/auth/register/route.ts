@@ -67,7 +67,8 @@ export async function POST(req: Request) {
       passwordHash,
       cnic: data.cnic || undefined, // store normalized digits only (no dashes)
       phone: data.phone,
-      role: data.role
+      role: data.role,
+      focalStatus: data.role === 'focal' ? 'pending' : undefined
     });
 
     return NextResponse.json({ id: user._id, email: user.email, role: user.role }, { status: 201 });

@@ -29,7 +29,7 @@ export async function GET(req: Request) {
     ];
   }
 
-  const users = await User.find(filter).select('name email role provider phone cnic createdAt').sort({ createdAt: -1 }).lean();
+  const users = await User.find(filter).select('name email role provider phone cnic focalStatus focalDocs createdAt').sort({ createdAt: -1 }).lean();
   return NextResponse.json(users);
 }
 

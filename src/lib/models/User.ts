@@ -12,6 +12,8 @@ export interface IUser {
   role: UserRole;
   provider?: 'credentials' | 'google';
   createdAt: Date;
+  focalStatus?: 'pending' | 'approved' | 'rejected';
+  focalDocs?: string[];
 }
 
 // REQ-1: signup captures CNIC, phone, and email.
@@ -29,7 +31,9 @@ const UserSchema = new Schema<IUser>(
     },
     phone: { type: String },
     role: { type: String, enum: ['donor', 'focal', 'admin'], default: 'donor' },
-    provider: { type: String, enum: ['credentials', 'google'], default: 'credentials' }
+    provider: { type: String, enum: ['credentials', 'google'], default: 'credentials' },
+    focalStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    focalDocs: { type: [String], default: [] }
   },
   { timestamps: true }
 );

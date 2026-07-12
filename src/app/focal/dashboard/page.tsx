@@ -31,6 +31,10 @@ export default function FocalDashboard() {
     fulfilled: requests.filter((r) => r.status === 'fulfilled').length
   };
 
+  if (session?.user && (session.user as any).focalStatus !== 'approved') {
+    return <PendingVerification session={session} />;
+  }
+
   return (
     <div className="min-h-screen bg-brand-cream p-6 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -117,6 +121,86 @@ export default function FocalDashboard() {
             </table>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function PendingVerification({ session }: { session: any }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedUrl, setUploadedUrl] = useState('');
+  const [error, setError] = useState('');
+  const status = session?.user?.focalStatus;
+
+  async function handleUpload(e: React.FormEvent) {
+    e.preventDefault();
+    if (!file) return;
+    setUploading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      
+      // Save document to user profile via a new endpoint or piggyback
+      const updateRes = await fetch(`/api/users/${session.user.id}/docs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: data.url })
+      });
+      if (!updateRes.ok) throw new Error('Failed to attach document to profile.');
+      
+      setUploadedUrl(data.url);
+      setFile(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-cream flex items-center justify-center p-6">
+      <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 shadow-lg max-w-md w-full text-center">
+        <div className="w-16 h-16 bg-brand-amber/10 text-brand-amber rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+          <iconify-icon icon="solar:shield-warning-bold"></iconify-icon>
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Account Pending Verification</h2>
+        <p className="text-slate-600 mb-6 text-sm">
+          {status === 'rejected' 
+            ? 'Your application has been rejected by an administrator. Please contact support.'
+            : 'To prevent fraud, all Focal Persons must be verified. Please upload a clear picture of your CNIC or NGO Affiliation Card.'}
+        </p>
+
+        {status === 'pending' && (
+          <form onSubmit={handleUpload} className="space-y-4 text-left">
+            {error && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-200">{error}</div>}
+            {uploadedUrl && <div className="p-3 bg-emerald-50 text-emerald-700 text-sm rounded-lg border border-emerald-200 flex items-center gap-2"><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Document uploaded successfully. An admin will review it soon.</div>}
+            
+            <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:bg-slate-50 transition cursor-pointer relative">
+              <input 
+                type="file" 
+                accept="image/*,.pdf" 
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <iconify-icon icon="solar:document-add-linear" class="text-3xl text-slate-400 mb-2"></iconify-icon>
+              <div className="text-sm font-medium text-brand-teal">{file ? file.name : 'Tap to select a document'}</div>
+              <div className="text-xs text-slate-500 mt-1">JPEG, PNG or PDF (Max 5MB)</div>
+            </div>
+
+            <button
+              disabled={!file || uploading}
+              className="w-full bg-slate-900 text-white py-2.5 rounded-lg font-medium hover:bg-slate-800 transition disabled:opacity-50"
+            >
+              {uploading ? 'Uploading...' : 'Submit Document'}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
