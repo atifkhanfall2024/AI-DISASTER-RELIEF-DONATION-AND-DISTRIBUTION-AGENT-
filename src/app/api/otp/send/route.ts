@@ -50,8 +50,8 @@ export async function POST(req: Request) {
     }
 
     // In dev, when no real provider is configured, return the code so the flow is
-    // testable without live email/SMS. This is NEVER returned in production.
-    const devCode = !configured && process.env.NODE_ENV !== 'production' ? code : undefined;
+    // testable without live email/SMS.
+    const devCode = !configured ? code : undefined;
     return NextResponse.json({ ok: true, configured, devCode });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to send verification code.' }, { status: 400 });
