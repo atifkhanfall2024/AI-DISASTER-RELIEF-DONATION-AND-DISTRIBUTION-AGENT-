@@ -10,15 +10,29 @@ import { config as loadEnv } from 'dotenv';
 // so load .env.local first (falling back to .env) before reading MONGODB_URI.
 loadEnv({ path: '.env.local' });
 loadEnv();
+import dns from 'node:dns';
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import User from '../src/lib/models/User';
 import ReliefRequest from '../src/lib/models/Request';
 
+// ── DNS Fix ───────────────────────────────────────────────────────────────────
+// Pakistan ISPs often fail MongoDB Atlas SRV lookups (querySrv ECONNREFUSED).
+// Prepend reliable public DNS resolvers so the connection works on any network.
+try {
+  const existing = dns.getServers();
+  dns.setServers([...new Set(['8.8.8.8', '1.1.1.1', ...existing])]);
+  console.log('✓ DNS resolvers set to Google + Cloudflare');
+} catch {
+  // safe to ignore on unsupported platforms
+}
+
 async function main() {
   const uri = process.env.MONGODB_URI;
   if (!uri) throw new Error('Set MONGODB_URI in .env.local before seeding.');
-  await mongoose.connect(uri);
+
+  console.log('⏳ Connecting to MongoDB Atlas...');
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 15000 });
 
   const passwordHash = await bcrypt.hash('password123', 10);
 

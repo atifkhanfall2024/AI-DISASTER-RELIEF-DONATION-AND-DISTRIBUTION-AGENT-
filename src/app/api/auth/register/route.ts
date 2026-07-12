@@ -12,10 +12,25 @@ const schema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(6),
-  cnic: z.string().optional(),
+  cnic: z
+    .string()
+    .optional()
+    .transform((val) => (val ? val.replace(/\D/g, '') : val)) // strip dashes/spaces
+    .refine((val) => !val || val.length === 13, {
+      message: 'CNIC must be exactly 13 digits.'
+    }),
   phone: z.string().min(7),
   // Admin accounts are provisioned separately (invite-only), never via open signup.
   role: z.enum(['donor', 'focal']).default('donor')
+}).refine((data) => {
+  // Focal persons must provide CNIC
+  if (data.role === 'focal' && !data.cnic) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'CNIC is required for Focal Person accounts.',
+  path: ['cnic']
 });
 
 export async function POST(req: Request) {
@@ -50,7 +65,7 @@ export async function POST(req: Request) {
       name: data.name,
       email: data.email.toLowerCase(),
       passwordHash,
-      cnic: data.cnic,
+      cnic: data.cnic || undefined, // store normalized digits only (no dashes)
       phone: data.phone,
       role: data.role
     });

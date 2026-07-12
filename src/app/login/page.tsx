@@ -58,6 +58,20 @@ function LoginPageContent() {
     return data.devCode as string | undefined;
   }
 
+  // ── CNIC helpers ──────────────────────────────────────────────────────────
+  // Auto-format CNIC as user types: XXXXX-XXXXXXX-X
+  function handleCnicChange(raw: string) {
+    const digits = raw.replace(/\D/g, '').slice(0, 13); // only digits, max 13
+    let formatted = digits;
+    if (digits.length > 12) formatted = `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
+    else if (digits.length > 5) formatted = `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    setForm({ ...form, cnic: formatted });
+  }
+
+  function getRawCnic() {
+    return form.cnic.replace(/\D/g, '');
+  }
+
   async function startVerification(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -67,6 +81,16 @@ function LoginPageContent() {
     }
     if (form.password.length < 6) {
       setError('Password must be at least 6 characters.');
+      return;
+    }
+    // CNIC validation — focal persons must provide it; if any user enters one it must be 13 digits
+    const rawCnic = getRawCnic();
+    if (form.role === 'focal' && rawCnic.length === 0) {
+      setError('CNIC is required for Focal Person accounts.');
+      return;
+    }
+    if (rawCnic.length > 0 && rawCnic.length !== 13) {
+      setError('CNIC must be exactly 13 digits (format: XXXXX-XXXXXXX-X).');
       return;
     }
     setSending(true);
@@ -265,13 +289,24 @@ function LoginPageContent() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1.5">CNIC</label>
+                      <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                        CNIC
+                        {form.role === 'focal' && <span className="text-red-500 ml-0.5">*</span>}
+                      </label>
                       <input
                         value={form.cnic}
-                        onChange={(e) => setForm({ ...form, cnic: e.target.value })}
+                        onChange={(e) => handleCnicChange(e.target.value)}
                         placeholder="XXXXX-XXXXXXX-X"
-                        className={inputClass}
+                        maxLength={15}
+                        inputMode="numeric"
+                        required={form.role === 'focal'}
+                        className={`${inputClass} ${form.cnic && getRawCnic().length !== 13 ? 'border-amber-400 focus:border-amber-500 focus:ring-amber-400' : form.cnic && getRawCnic().length === 13 ? 'border-green-500 focus:border-green-500 focus:ring-green-500' : ''}`}
                       />
+                      {form.cnic.length > 0 && (
+                        <p className={`text-[11px] mt-1 ${getRawCnic().length === 13 ? 'text-green-600' : 'text-amber-600'}`}>
+                          {getRawCnic().length === 13 ? '✓ Valid CNIC' : `${getRawCnic().length}/13 digits entered`}
+                        </p>
+                      )}
                     </div>
                   </div>
 

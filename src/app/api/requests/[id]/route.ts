@@ -10,10 +10,33 @@ import { notifyRequestDecision, notifyRequestFulfilled } from '@/lib/notify';
 export const dynamic = 'force-dynamic';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
   await connectDB();
-  const request = await ReliefRequest.findById(params.id).populate('focal', 'name email cnic').lean();
+
+  const request = await ReliefRequest.findById(params.id).populate('focal', 'name email cnic').lean() as any;
   if (!request) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json(request);
+
+  const PUBLIC_STATUSES = ['approved', 'fulfilled'];
+  const isPublic = PUBLIC_STATUSES.includes(request.status);
+
+  // Approved/fulfilled requests are visible to everyone (donors, public, unauthenticated)
+  if (isPublic) return NextResponse.json(request);
+
+  // Non-public requests (pending, needs_approval, rejected) → restrict access
+  const role = session?.user?.role;
+  const userId = session?.user?.id;
+
+  // Admin can see everything
+  if (role === 'admin') return NextResponse.json(request);
+
+  // Focal person can only see their own submissions
+  const focalId = request.focal?._id?.toString() || request.focal?.toString();
+  if (role === 'focal' && focalId && focalId === userId) {
+    return NextResponse.json(request);
+  }
+
+  // Everyone else gets 403
+  return NextResponse.json({ error: 'Not authorized to view this request.' }, { status: 403 });
 }
 
 const patchSchema = z.object({

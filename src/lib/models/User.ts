@@ -20,7 +20,13 @@ const UserSchema = new Schema<IUser>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String },
-    cnic: { type: String },
+    cnic: {
+      type: String,
+      validate: {
+        validator: (v: string) => !v || /^\d{13}$/.test(v),
+        message: 'CNIC must be exactly 13 digits (no dashes).'
+      }
+    },
     phone: { type: String },
     role: { type: String, enum: ['donor', 'focal', 'admin'], default: 'donor' },
     provider: { type: String, enum: ['credentials', 'google'], default: 'credentials' }
