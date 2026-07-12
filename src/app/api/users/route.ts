@@ -15,22 +15,26 @@ export async function GET(req: Request) {
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Admin only.' }, { status: 403 });
   }
-  await connectDB();
-  const { searchParams } = new URL(req.url);
-  const role = searchParams.get('role');
-  const search = searchParams.get('search');
+  try {
+    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const role = searchParams.get('role');
+    const search = searchParams.get('search');
 
-  const filter: any = {};
-  if (role && role !== 'all') filter.role = role;
-  if (search) {
-    filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } }
-    ];
+    const filter: any = {};
+    if (role && role !== 'all') filter.role = role;
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const users = await User.find(filter).select('name email role provider phone cnic focalStatus focalDocs createdAt').sort({ createdAt: -1 }).lean();
+    return NextResponse.json(users);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to fetch users' }, { status: 500 });
   }
-
-  const users = await User.find(filter).select('name email role provider phone cnic focalStatus focalDocs createdAt').sort({ createdAt: -1 }).lean();
-  return NextResponse.json(users);
 }
 
 const createSchema = z.object({

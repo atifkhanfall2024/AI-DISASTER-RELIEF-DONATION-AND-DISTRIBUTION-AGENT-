@@ -25,13 +25,29 @@ export default function AdminUsersPage() {
 
   async function load() {
     setLoading(true);
-    const qs = new URLSearchParams();
-    if (roleFilter !== 'all') qs.set('role', roleFilter);
-    if (search) qs.set('search', search);
-    const res = await fetch(`/api/users?${qs.toString()}`);
-    const data = await res.json();
-    setUsers(Array.isArray(data) ? data : []);
-    setLoading(false);
+    try {
+      const qs = new URLSearchParams();
+      if (roleFilter !== 'all') qs.set('role', roleFilter);
+      if (search) qs.set('search', search);
+      const res = await fetch(`/api/users?${qs.toString()}`);
+      
+      let data = [];
+      try {
+        data = await res.json();
+      } catch (err) {
+        throw new Error('Invalid JSON response from server');
+      }
+
+      if (!res.ok) throw new Error((data as any).error || 'Failed to load users');
+      
+      setUsers(Array.isArray(data) ? data : []);
+      setError('');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Error loading users');
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -310,7 +326,6 @@ export default function AdminUsersPage() {
               </tbody>
             </table>
           </div>
-        </div>
         </div>
       </div>
 
