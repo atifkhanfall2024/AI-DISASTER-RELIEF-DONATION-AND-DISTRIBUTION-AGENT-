@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
 import Providers from '@/components/Providers';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'ReliefAid - Disaster Relief Distribution',
@@ -24,8 +25,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="bg-[#F1EFE8] dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans antialiased text-sm transition-colors">
-        <Providers>{children}</Providers>
+      <body className="bg-[#F1EFE8] dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans antialiased text-sm transition-colors pt-20">
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );
