@@ -61,14 +61,6 @@ export default async function LandingPage() {
         <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-brand-amber/20 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob dark:mix-blend-screen" style={{ animationDelay: '4s' }}></div>
 
         <div className="max-w-5xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-slate-800/60 border border-brand-teal/20 backdrop-blur-md text-brand-teal dark:text-brand-teal font-medium text-sm mb-8 animate-fade-in-up shadow-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-teal opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-teal"></span>
-            </span>
-            AI-Powered Disaster Relief
-          </div>
-          
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-8 leading-[1.1] animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Connecting Relief <br className="hidden md:block" /> 
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-teal via-brand-blue to-brand-amber">Where It&apos;s Needed Most</span>
