@@ -61,7 +61,12 @@ export default async function LandingPage() {
         <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-brand-amber/20 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob dark:mix-blend-screen" style={{ animationDelay: '4s' }}></div>
 
         <div className="max-w-5xl mx-auto text-center relative z-10">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-8 leading-[1.1] animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <div className="flex justify-center mb-6 animate-fade-in-up">
+            <div className="bg-white/80 dark:bg-slate-800/80 p-4 rounded-full shadow-sm border border-brand-teal/20 backdrop-blur-sm">
+              <iconify-icon icon="solar:hand-heart-bold" class="text-5xl text-brand-teal drop-shadow-sm"></iconify-icon>
+            </div>
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-8 leading-[1.2] animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             Connecting Relief <br className="hidden md:block" /> 
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-teal via-brand-blue to-brand-amber">Where It&apos;s Needed Most</span>
           </h1>
