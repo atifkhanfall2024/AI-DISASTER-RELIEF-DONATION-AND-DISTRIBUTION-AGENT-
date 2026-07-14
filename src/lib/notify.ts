@@ -236,3 +236,30 @@ export async function notifyRequestFulfilled(request: IReliefRequest) {
     console.error('notifyRequestFulfilled failed:', err);
   }
 }
+
+/** In-Kind Item Pledge received by Admin → Thank you email to donor. */
+export async function notifyPledgeReceived(pledge: any) {
+  try {
+    const detail = rows([
+      ['Tracking ID', pledge.trackingId],
+      ['Drop-off Location', pledge.dropoffLocation],
+      ['Items Received', pledge.items.map((i: any) => `${i.quantity} ${i.unit} ${i.name}`).join(', ')]
+    ]);
+
+    await sendMany(
+      [pledge.donorEmail],
+      `Your Item Donation ${pledge.trackingId} was received — thank you!`,
+      `Thank you ${pledge.donorName}! We successfully received your donation of physical relief items. Tracking ID: ${pledge.trackingId}.`,
+      shell(
+        'Thank you for your physical donation!',
+        `<p>Assalam-o-Alaikum ${pledge.donorName},</p>
+         <p>We are writing to confirm that our team has successfully received and verified your physical item donation at <strong>${pledge.dropoffLocation}</strong>.</p>
+         ${detail}
+         <p>These items have been added to our Central Inventory and will be dispatched to the most critical disaster areas very soon.</p>`,
+        { label: 'Return to Website', url: APP_URL }
+      )
+    );
+  } catch (err) {
+    console.error('notifyPledgeReceived failed:', err);
+  }
+}

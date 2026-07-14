@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 const ROLE_STYLES: Record<string, string> = {
+  'super-admin': 'text-purple-700 bg-purple-50 border-purple-200',
   admin: 'text-[#993C1D] bg-[#993C1D]/10 border-[#993C1D]/20',
   focal: 'text-[#185FA5] bg-blue-50 border-blue-200',
   donor: 'text-[#0F6E56] bg-emerald-50 border-emerald-200'
@@ -12,6 +14,7 @@ const ROLE_STYLES: Record<string, string> = {
 const emptyForm = { name: '', email: '', password: '', phone: '', cnic: '', role: 'focal' as 'focal' | 'admin' };
 
 export default function AdminUsersPage() {
+  const { data: session } = useSession();
   const [users, setUsers] = useState<any[]>([]);
   const [roleFilter, setRoleFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -178,7 +181,7 @@ export default function AdminUsersPage() {
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-teal bg-white dark:bg-slate-900"
                 >
                   <option value="focal">Focal Person</option>
-                  <option value="admin">Admin</option>
+                  {session?.user?.role === 'super-admin' && <option value="admin">Admin</option>}
                 </select>
               </div>
               <div>

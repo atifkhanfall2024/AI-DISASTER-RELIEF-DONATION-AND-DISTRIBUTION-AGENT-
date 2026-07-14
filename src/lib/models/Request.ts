@@ -31,6 +31,7 @@ export interface IReliefRequest {
   aiFlags: string[];
   aiReasoning?: string;
   aiRecommendation?: 'approve' | 'reject' | 'review';
+  agentLogisticsPlan?: string;
   adminNotes?: string;
   donationGoal: number;
   donationRaised: number;
@@ -67,6 +68,7 @@ const RequestSchema = new Schema<IReliefRequest>(
     aiFlags: [{ type: String }],
     aiReasoning: String,
     aiRecommendation: { type: String, enum: ['approve', 'reject', 'review'] },
+    agentLogisticsPlan: String,
     adminNotes: String,
     donationGoal: { type: Number, default: 100000 },
     donationRaised: { type: Number, default: 0 },

@@ -16,7 +16,7 @@ export default function AdminDashboard() {
 }
 
 function AdminDashboardContent() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [requests, setRequests] = useState<any[]>([]);
@@ -89,9 +89,11 @@ function AdminDashboardContent() {
             >
               <iconify-icon icon="solar:check-circle-linear" class="text-lg"></iconify-icon> Approved
             </button>
-            <Link href="/admin/logs" className="flex items-center gap-3 px-3 py-2 hover:bg-slate-800 hover:text-white rounded-lg font-medium transition mt-4">
-              <iconify-icon icon="solar:history-linear" class="text-lg"></iconify-icon> System Logs
-            </Link>
+            {status === 'authenticated' && session?.user?.role === 'super-admin' && (
+              <Link href="/admin/logs" className="flex items-center gap-3 px-3 py-2 hover:bg-slate-800 hover:text-white rounded-lg font-medium transition mt-4">
+                <iconify-icon icon="solar:history-linear" class="text-lg"></iconify-icon> System Logs
+              </Link>
+            )}
           </nav>
         </div>
       </aside>
@@ -99,8 +101,14 @@ function AdminDashboardContent() {
       <main className="flex-1 md:ml-64 p-6 md:p-8">
         <div className="mb-8 flex justify-between items-end">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Admin Command Center</h1>
-            <p className="text-slate-500 dark:text-slate-400">Overview of all system activity and AI queue.</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+              Admin Command Center
+              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-1 rounded-md flex items-center gap-1 font-semibold tracking-wide shadow-sm">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                Distribution Agent Online
+              </span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">Overview of all system activity, AI queue, and RPI allocation engine.</p>
           </div>
           <ThemeToggle />
         </div>
@@ -125,10 +133,12 @@ function AdminDashboardContent() {
               <div className="text-slate-500 text-xs mb-1">Rejected</div>
               <div className="text-2xl font-semibold text-slate-400 tracking-tight">{stats.rejected}</div>
             </div>
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 shadow-sm col-span-2 md:col-span-1 border-l-4 border-l-brand-blue">
-              <div className="text-slate-500 text-xs mb-1">Total Donations</div>
-              <div className="text-2xl font-semibold text-brand-blue tracking-tight">PKR {stats.totalDonations.toLocaleString()}</div>
-            </div>
+            {session?.user?.role === 'super-admin' && (
+              <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 shadow-sm col-span-2 md:col-span-1 border-l-4 border-l-brand-blue">
+                <div className="text-slate-500 text-xs mb-1">Total Donations</div>
+                <div className="text-2xl font-semibold text-brand-blue tracking-tight">PKR {stats.totalDonations.toLocaleString()}</div>
+              </div>
+            )}
           </div>
         )}
 

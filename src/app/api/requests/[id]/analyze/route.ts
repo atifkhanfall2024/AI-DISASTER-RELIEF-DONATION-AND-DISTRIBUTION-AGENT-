@@ -11,7 +11,7 @@ import { analyzeRequest } from '@/lib/gemini';
 // POST /api/requests/:id/analyze -> re-run Gemini AI analysis on demand (admin only)
 export async function POST(_req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
+  if (!session || (session.user.role !== 'admin' && session.user.role !== 'super-admin')) {
     return NextResponse.json({ error: 'Admin only.' }, { status: 403 });
   }
 

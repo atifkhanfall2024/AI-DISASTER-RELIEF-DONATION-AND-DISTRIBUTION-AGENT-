@@ -38,7 +38,7 @@ export default function Navbar() {
                   Dashboard
                 </Link>
               )}
-              {session.user.role === 'admin' && (
+              {(session.user.role === 'admin' || session.user.role === 'super-admin') && (
                 <>
                   <Link href="/admin/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-brand-teal font-medium transition-colors">
                     Admin
@@ -46,16 +46,29 @@ export default function Navbar() {
                   <Link href="/admin/map" className="text-slate-600 dark:text-slate-300 hover:text-brand-teal font-medium transition-colors hidden sm:inline">
                     Map
                   </Link>
-                  <Link href="/admin/analytics" className="text-slate-600 dark:text-slate-300 hover:text-brand-teal font-medium transition-colors hidden sm:inline">
-                    Analytics
-                  </Link>
+                  {session.user.role === 'super-admin' && (
+                    <>
+                      <Link href="/admin/inventory" className="text-slate-600 dark:text-slate-300 hover:text-brand-teal font-medium transition-colors hidden md:inline">
+                        Inventory
+                      </Link>
+                      <Link href="/admin/pledges" className="text-slate-600 dark:text-slate-300 hover:text-brand-teal font-medium transition-colors hidden md:inline">
+                        Item Pledges
+                      </Link>
+                      <Link href="/admin/analytics" className="text-slate-600 dark:text-slate-300 hover:text-brand-teal font-medium transition-colors hidden sm:inline">
+                        Analytics
+                      </Link>
+                    </>
+                  )}
                   <Link href="/admin/users" className="text-slate-600 dark:text-slate-300 hover:text-brand-teal font-medium transition-colors hidden md:inline">
                     Users
                   </Link>
                 </>
               )}
               <Link href="/donate" className="text-slate-600 dark:text-slate-300 hover:text-brand-teal font-medium transition-colors">
-                Donate
+                Donate Money
+              </Link>
+              <Link href="/donate/items" className="text-slate-600 dark:text-slate-300 hover:text-brand-blue font-medium transition-colors hidden sm:inline">
+                Donate Items
               </Link>
               {session.user.role === 'donor' && (
                 <Link href="/donate/history" className="text-slate-600 dark:text-slate-300 hover:text-brand-teal font-medium transition-colors">

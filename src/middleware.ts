@@ -6,10 +6,13 @@ export default withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
-    if (path.startsWith('/admin') && token?.role !== 'admin') {
+    if (path.startsWith('/admin') && token?.role !== 'admin' && token?.role !== 'super-admin') {
       return NextResponse.redirect(new URL('/', req.url));
     }
-    if (path.startsWith('/focal') && token?.role !== 'focal' && token?.role !== 'admin') {
+    if ((path.startsWith('/admin/analytics') || path.startsWith('/admin/logs')) && token?.role !== 'super-admin') {
+      return NextResponse.redirect(new URL('/admin/dashboard', req.url));
+    }
+    if (path.startsWith('/focal') && token?.role !== 'focal' && token?.role !== 'admin' && token?.role !== 'super-admin') {
       return NextResponse.redirect(new URL('/', req.url));
     }
     return NextResponse.next();

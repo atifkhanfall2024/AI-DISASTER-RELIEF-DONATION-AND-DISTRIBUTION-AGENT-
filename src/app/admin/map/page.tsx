@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { useSession } from 'next-auth/react';
 
 // Leaflet touches `window` at import time — load the map client-side only.
 const RequestsMap = dynamic(() => import('@/components/RequestsMap'), {
@@ -34,6 +35,7 @@ const LEGEND = [
 ];
 
 export default function AdminMapPage() {
+  const { data: session } = useSession();
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [urgency, setUrgency] = useState('all');
@@ -63,12 +65,14 @@ export default function AdminMapPage() {
             <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Relief Map</h1>
             <p className="text-slate-500">Every GPS-tagged request across the country, colored by urgency.</p>
           </div>
-          <Link
-            href="/admin/analytics"
-            className="bg-white dark:bg-slate-900 border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition text-sm flex items-center gap-2 self-start sm:self-auto"
-          >
-            <iconify-icon icon="solar:chart-2-linear"></iconify-icon> Analytics
-          </Link>
+          {session?.user?.role === 'super-admin' && (
+            <Link
+              href="/admin/analytics"
+              className="bg-white dark:bg-slate-900 border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition text-sm flex items-center gap-2 self-start sm:self-auto"
+            >
+              <iconify-icon icon="solar:chart-2-linear"></iconify-icon> Analytics
+            </Link>
+          )}
         </div>
 
         {/* Filters in one row above the map */}

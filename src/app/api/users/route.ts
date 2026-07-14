@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 // GET /api/users?role=&search= -> admin-only user directory.
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
+  if (!session || (session.user.role !== 'admin' && session.user.role !== 'super-admin')) {
     return NextResponse.json({ error: 'Admin only.' }, { status: 403 });
   }
   try {
@@ -43,20 +43,24 @@ const createSchema = z.object({
   password: z.string().min(6),
   phone: z.string().optional(),
   cnic: z.string().optional(),
-  // Admins provision focal persons and fellow admins here — this is the ONLY
-  // path to an admin account (open self-registration rejects role=admin).
-  role: z.enum(['focal', 'admin'])
+  // Admins provision focal persons. Super Admins provision admins and super-admins.
+  role: z.enum(['focal', 'admin', 'super-admin'])
 });
 
 // POST /api/users -> admin invites/creates a focal person or another admin.
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
+  if (!session || (session.user.role !== 'admin' && session.user.role !== 'super-admin')) {
     return NextResponse.json({ error: 'Admin only.' }, { status: 403 });
   }
 
   try {
     const data = createSchema.parse(await req.json());
+    
+    if ((data.role === 'admin' || data.role === 'super-admin') && session.user.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Only Super Admins can create other Admins.' }, { status: 403 });
+    }
+
     await connectDB();
 
     const email = data.email.toLowerCase();

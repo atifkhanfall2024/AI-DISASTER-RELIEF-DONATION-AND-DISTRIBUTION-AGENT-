@@ -76,8 +76,8 @@ export async function GET(req: Request) {
 // POST /api/requests -> focal person submits a new request, triggers Gemini AI analysis
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user.role !== 'focal' && session.user.role !== 'admin')) {
-    return NextResponse.json({ error: 'Only focal persons can submit requests.' }, { status: 403 });
+  if (!session || (session.user.role !== 'focal' && session.user.role !== 'admin' && session.user.role !== 'super-admin')) {
+    return NextResponse.json({ error: 'Focal or Admin only.' }, { status: 403 });
   }
 
   try {

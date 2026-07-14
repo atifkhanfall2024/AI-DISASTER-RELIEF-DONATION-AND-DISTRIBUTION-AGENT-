@@ -15,6 +15,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import User from '../src/lib/models/User';
 import ReliefRequest from '../src/lib/models/Request';
+import Inventory from '../src/lib/models/Inventory';
 
 // ── DNS Fix ───────────────────────────────────────────────────────────────────
 // Pakistan ISPs often fail MongoDB Atlas SRV lookups (querySrv ECONNREFUSED).
@@ -39,6 +40,12 @@ async function main() {
   const admin = await User.findOneAndUpdate(
     { email: 'admin@reliefaid.dev' },
     { name: 'Admin User', email: 'admin@reliefaid.dev', passwordHash, role: 'admin' },
+    { upsert: true, new: true }
+  );
+
+  const superAdmin = await User.findOneAndUpdate(
+    { email: 'superadmin@reliefaid.dev' },
+    { name: 'Super Admin', email: 'superadmin@reliefaid.dev', passwordHash, role: 'super-admin' },
     { upsert: true, new: true }
   );
 
@@ -103,7 +110,16 @@ async function main() {
     { upsert: true, new: true }
   );
 
+  await Inventory.deleteMany({});
+  await Inventory.create([
+    { itemName: 'Winter Tents', category: 'Shelter', totalQuantity: 500, reservedQuantity: 0, unit: 'tents' },
+    { itemName: 'Food Rations (Standard)', category: 'Food', totalQuantity: 2000, reservedQuantity: 0, unit: 'bags' },
+    { itemName: 'Medical First Aid Kits', category: 'Medical', totalQuantity: 300, reservedQuantity: 0, unit: 'kits' },
+    { itemName: 'Clean Water Bottles', category: 'Water', totalQuantity: 5000, reservedQuantity: 0, unit: 'bottles' }
+  ]);
+
   console.log('Seed complete. Demo accounts (password: password123):');
+  console.log(' - superadmin@reliefaid.dev (super-admin)');
   console.log(' - admin@reliefaid.dev (admin)');
   console.log(' - focal@reliefaid.dev (focal)');
   console.log(' - donor@reliefaid.dev (donor)');

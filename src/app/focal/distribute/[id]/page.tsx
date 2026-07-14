@@ -203,6 +203,62 @@ export default function RecordDistributionPage() {
           </div>
         )}
 
+        {request.agentLogisticsPlan && (
+          <div className="bg-emerald-50 dark:bg-slate-900 border border-emerald-200 rounded-xl p-5 shadow-sm mb-6">
+            <h3 className="flex items-center gap-2 text-emerald-800 dark:text-emerald-400 font-semibold text-lg mb-3">
+              <iconify-icon icon="solar:routing-2-bold" class="text-xl"></iconify-icon> Agent Distribution Instructions
+            </h3>
+            <p className="text-xs text-emerald-700/80 mb-4">
+              The AI Distribution Agent has analyzed this request and allocated central inventory. Please follow these instructions:
+            </p>
+            {(() => {
+              try {
+                const plan = JSON.parse(request.agentLogisticsPlan);
+                return (
+                  <div className="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+                    <div>
+                      <strong className="block text-emerald-900 dark:text-emerald-300 mb-1">Approved Stock to Distribute:</strong>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {plan.allocatedStock.length > 0 ? (
+                          plan.allocatedStock.map((s: any, idx: number) => (
+                            <li key={idx}>
+                              <span className="font-semibold">{s.quantity} {s.unit}</span> of {s.itemName}
+                            </li>
+                          ))
+                        ) : (
+                          <li>No stock allocated from central inventory. Provide aid using general funds.</li>
+                        )}
+                      </ul>
+                    </div>
+                    <div>
+                      <strong className="block text-emerald-900 dark:text-emerald-300 mb-1">Logistics Plan:</strong>
+                      <p>{plan.logisticsRoute}</p>
+                    </div>
+                    {plan.risks?.length > 0 && (
+                      <div>
+                        <strong className="block text-emerald-900 dark:text-emerald-300 mb-1">Safety Risks:</strong>
+                        <ul className="list-disc pl-5 space-y-1 text-brand-rust">
+                          {plan.risks.map((r: string, idx: number) => (
+                            <li key={idx}>{r}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {plan.duplicateWarning && (
+                      <div className="bg-red-100 text-red-700 p-3 rounded-lg flex items-center gap-2 border border-red-200 text-xs mt-4">
+                        <iconify-icon icon="solar:danger-triangle-bold" class="text-base"></iconify-icon>
+                        <strong>Note:</strong> Be careful to collect CNICs, as nearby duplicate distributions were detected recently.
+                      </div>
+                    )}
+                  </div>
+                );
+              } catch (e) {
+                return null;
+              }
+            })()}
+          </div>
+        )}
+
         {canRecord && (
           <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 shadow-sm p-6 space-y-5 mb-8">
             <div>
