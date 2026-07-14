@@ -79,7 +79,14 @@ export default async function LandingPage() {
               className="group relative bg-brand-teal text-white px-8 py-4 rounded-full font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(15,110,86,0.3)] hover:shadow-[0_0_30px_rgba(15,110,86,0.6)] text-base flex items-center justify-center gap-3"
             >
               <iconify-icon icon="solar:heart-bold" class="text-xl group-hover:animate-pulse"></iconify-icon>
-              I Want to Help
+              Donate Money
+            </Link>
+            <Link
+              href="/donate/items"
+              className="group relative bg-brand-blue text-white px-8 py-4 rounded-full font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(24,95,165,0.3)] hover:shadow-[0_0_30px_rgba(24,95,165,0.6)] text-base flex items-center justify-center gap-3"
+            >
+              <iconify-icon icon="solar:box-minimalistic-bold" class="text-xl group-hover:animate-pulse"></iconify-icon>
+              Donate Items
             </Link>
             <Link
               href="/focal/submit"

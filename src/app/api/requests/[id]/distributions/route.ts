@@ -56,7 +56,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 // on-the-ground aid delivery for an APPROVED request.
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user.role !== 'focal' && session.user.role !== 'admin')) {
+  if (!session || (session.user.role !== 'focal' && session.user.role !== 'admin' && session.user.role !== 'super-admin')) {
     return NextResponse.json({ error: 'Only focal persons or admins can record distributions.' }, { status: 403 });
   }
 
@@ -130,7 +130,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     await Log.create({
       actorName: session.user.name || 'Focal User',
-      actorType: session.user.role === 'admin' ? 'admin' : 'focal',
+      actorType: (session.user.role === 'admin' || session.user.role === 'super-admin') ? 'admin' : 'focal',
       action: `Recorded Distribution (${data.familiesReached} families${
         data.amountSpent > 0 ? `, PKR ${data.amountSpent.toLocaleString()}` : ''
       })`,

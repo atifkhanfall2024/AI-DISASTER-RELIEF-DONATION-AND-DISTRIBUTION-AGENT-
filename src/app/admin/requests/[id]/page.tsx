@@ -20,6 +20,7 @@ export default function AdminRequestDetail() {
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState(false);
   const [reanalyzing, setReanalyzing] = useState(false);
+  const [runningAgent, setRunningAgent] = useState(false);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
 
   async function load() {
@@ -83,6 +84,19 @@ export default function AdminRequestDetail() {
       alert(e.message);
     } finally {
       setReanalyzing(false);
+    }
+  }
+
+  async function runAgent() {
+    setRunningAgent(true);
+    try {
+      const res = await fetch(`/api/requests/${id}/agent-plan`, { method: 'POST' });
+      if (!res.ok) throw new Error((await res.json()).error);
+      await load();
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setRunningAgent(false);
     }
   }
 
@@ -222,6 +236,62 @@ export default function AdminRequestDetail() {
                 emptyText="No distributions recorded for this request yet."
               />
             </div>
+
+            {request.agentLogisticsPlan && (
+              <div className="bg-emerald-50 dark:bg-slate-900 border border-emerald-200 rounded-xl p-5 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.1)] mt-6">
+                <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-400 font-semibold text-lg mb-4">
+                  <iconify-icon icon="solar:routing-2-bold" class="text-xl"></iconify-icon> AI Distribution Logistics Plan
+                </div>
+                {(() => {
+                  try {
+                    const plan = JSON.parse(request.agentLogisticsPlan);
+                    return (
+                      <div className="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+                        {plan.duplicateWarning && (
+                          <div className="bg-red-100 text-red-700 p-3 rounded-lg flex items-center gap-2 border border-red-200">
+                            <iconify-icon icon="solar:danger-triangle-bold" class="text-lg"></iconify-icon>
+                            <strong>Duplicate Warning:</strong> Recent distributions detected nearby. Check carefully before dispensing stock.
+                          </div>
+                        )}
+                        <div>
+                          <strong className="block text-emerald-900 dark:text-emerald-300 mb-1">Allocated Central Stock:</strong>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {plan.allocatedStock.length > 0 ? (
+                              plan.allocatedStock.map((s: any, idx: number) => (
+                                <li key={idx}>
+                                  <span className="font-semibold">{s.quantity} {s.unit}</span> of {s.itemName}
+                                </li>
+                              ))
+                            ) : (
+                              <li>No stock allocated (insufficient central inventory or not applicable).</li>
+                            )}
+                          </ul>
+                        </div>
+                        <div>
+                          <strong className="block text-emerald-900 dark:text-emerald-300 mb-1">Logistics & Route:</strong>
+                          <p>{plan.logisticsRoute}</p>
+                        </div>
+                        {plan.risks?.length > 0 && (
+                          <div>
+                            <strong className="block text-emerald-900 dark:text-emerald-300 mb-1">Identified Risks:</strong>
+                            <ul className="list-disc pl-5 space-y-1 text-brand-rust">
+                              {plan.risks.map((r: string, idx: number) => (
+                                <li key={idx}>{r}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        <div className="bg-white/50 p-3 rounded-lg border border-emerald-200/50 italic">
+                          {plan.notes}
+                        </div>
+                      </div>
+                    );
+                  } catch (e) {
+                    return <p className="text-red-500">Failed to parse logistics plan.</p>;
+                  }
+                })()}
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-1">
@@ -298,6 +368,15 @@ export default function AdminRequestDetail() {
                 >
                   <iconify-icon icon="solar:close-circle-linear"></iconify-icon> Reject
                 </button>
+                {request.status === 'approved' && !request.agentLogisticsPlan && (
+                  <button
+                    onClick={runAgent}
+                    disabled={runningAgent}
+                    className="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition shadow-sm text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <iconify-icon icon="solar:routing-2-bold"></iconify-icon> Run Distribution Agent
+                  </button>
+                )}
                 {request.status === 'approved' && (
                   <button
                     onClick={() => act('fulfill')}

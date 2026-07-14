@@ -1,6 +1,6 @@
 import { Schema, models, model } from 'mongoose';
 
-export type UserRole = 'donor' | 'focal' | 'admin';
+export type UserRole = 'donor' | 'focal' | 'admin' | 'super-admin';
 
 export interface IUser {
   _id: string;
@@ -30,7 +30,7 @@ const UserSchema = new Schema<IUser>(
       }
     },
     phone: { type: String },
-    role: { type: String, enum: ['donor', 'focal', 'admin'], default: 'donor' },
+    role: { type: String, enum: ['donor', 'focal', 'admin', 'super-admin'], default: 'donor' },
     provider: { type: String, enum: ['credentials', 'google'], default: 'credentials' },
     focalStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     focalDocs: { type: [String], default: [] }

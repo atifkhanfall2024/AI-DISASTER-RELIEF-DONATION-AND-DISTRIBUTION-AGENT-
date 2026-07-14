@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/authOptions';
 import { connectDB } from '@/lib/mongodb';
 import Distribution from '@/lib/models/Distribution';
 import ReliefRequest from '@/lib/models/Request';
+import Inventory from '@/lib/models/Inventory';
 import Log from '@/lib/models/Log';
 import { notifyRequestFulfilled } from '@/lib/notify';
 
@@ -19,7 +20,7 @@ const patchSchema = z.object({
 // closing the loop: donate → distribute → verify → fulfilled.
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
+  if (!session || (session.user.role !== 'admin' && session.user.role !== 'super-admin')) {
     return NextResponse.json({ error: 'Admin only.' }, { status: 403 });
   }
 
@@ -37,6 +38,23 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     distribution.verifiedBy = session.user.id as any;
     distribution.verifiedAt = new Date();
     await distribution.save();
+
+    // Deduct stock from Inventory
+    if (distribution.items && Array.isArray(distribution.items)) {
+      for (const item of distribution.items) {
+        // Try to find if this item exists in our central inventory
+        const invItem = await Inventory.findOne({ itemName: item.name });
+        if (invItem) {
+          // Decrement total by what was distributed
+          invItem.totalQuantity = Math.max(0, invItem.totalQuantity - item.quantity);
+          // Only decrement reserved if it actually had reserved stock (agent was run)
+          if (invItem.reservedQuantity > 0) {
+            invItem.reservedQuantity = Math.max(0, invItem.reservedQuantity - item.quantity);
+          }
+          await invItem.save();
+        }
+      }
+    }
 
     const relatedId = `#${distribution.request.toString().slice(-6).toUpperCase()}`;
     await Log.create({

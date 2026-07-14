@@ -11,8 +11,8 @@ export const dynamic = 'force-dynamic';
 // GET /api/analytics -> admin-only aggregate breakdowns for the analytics dashboard.
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
-    return NextResponse.json({ error: 'Admin only.' }, { status: 403 });
+  if (!session || session.user.role !== 'super-admin') {
+    return NextResponse.json({ error: 'Super Admin only.' }, { status: 403 });
   }
 
   await connectDB();

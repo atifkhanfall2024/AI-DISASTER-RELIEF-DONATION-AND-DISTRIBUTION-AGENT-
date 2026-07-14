@@ -111,3 +111,76 @@ function fallbackHeuristic(input: AiAnalysisInput): AiAnalysisResult {
     recommendation
   };
 }
+
+export interface DistributionPlanInput {
+  area: string;
+  district?: string;
+  disasterType?: string;
+  familiesAffected: number;
+  itemsRequested: string[];
+  currentInventory: { itemName: string; available: number; unit: string }[];
+  recentDistributions: { area: string; createdAt: Date }[];
+}
+
+export interface DistributionPlanResult {
+  allocatedStock: { itemName: string; quantity: number; unit: string }[];
+  logisticsRoute: string;
+  risks: string[];
+  duplicateWarning: boolean;
+  notes: string;
+}
+
+export async function generateDistributionPlan(input: DistributionPlanInput): Promise<DistributionPlanResult> {
+  try {
+    if (!process.env.GEMINI_API_KEY) throw new Error('No GEMINI_API_KEY set');
+    const model = genAI.getGenerativeModel({ model: MODEL });
+
+    const prompt = `You are an AI Distribution Logistics Agent for disaster relief.
+Analyze the approved request and available inventory, and output a strict JSON distribution plan.
+Do NOT output markdown code blocks. Output ONLY valid JSON.
+
+Request Details:
+Area: ${input.area}${input.district ? ', ' + input.district : ''}
+Disaster: ${input.disasterType || 'Unknown'}
+Families Affected: ${input.familiesAffected}
+Items Requested by focal person: ${input.itemsRequested.join(', ') || 'None'}
+
+Available Central Inventory:
+${input.currentInventory.map(i => `- ${i.itemName}: ${i.available} ${i.unit}`).join('\n') || 'No inventory available.'}
+
+Recent Distributions in 10km Radius (last 7 days):
+${input.recentDistributions.length ? input.recentDistributions.map(r => `- ${r.area} on ${r.createdAt.toISOString()}`).join('\n') : 'None'}
+
+INSTRUCTIONS:
+1. "allocatedStock": Assign items from 'Available Central Inventory' that make sense for the disaster and number of families. Do not exceed available quantities. 
+2. "duplicateWarning": true if 'Recent Distributions' implies they might have already received aid.
+3. "logisticsRoute": 1-2 sentences on best delivery approach.
+4. "risks": Array of strings (e.g. "Roads might be flooded").
+5. "notes": 1-2 sentences summarizing the plan.
+
+EXPECTED JSON:
+{
+  "allocatedStock": [{"itemName": "string", "quantity": number, "unit": "string"}],
+  "logisticsRoute": "string",
+  "risks": ["string"],
+  "duplicateWarning": boolean,
+  "notes": "string"
+}`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    const cleaned = text.replace(/^```json\s*|^```\s*|```$/g, '').trim();
+    return JSON.parse(cleaned) as DistributionPlanResult;
+  } catch (err) {
+    console.error('Gemini Distribution Agent failed, using fallback:', err);
+    // Fallback if API fails
+    return {
+      allocatedStock: [],
+      logisticsRoute: "Standard delivery via main highways.",
+      risks: ["Standard operational risks."],
+      duplicateWarning: input.recentDistributions.length > 0,
+      notes: "Fallback plan used due to AI service unavailability."
+    };
+  }
+}
+

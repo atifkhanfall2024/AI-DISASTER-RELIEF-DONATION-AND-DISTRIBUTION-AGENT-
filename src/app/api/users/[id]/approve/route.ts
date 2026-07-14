@@ -8,9 +8,8 @@ export const dynamic = 'force-dynamic';
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  // Only admins can approve or reject
-  if (!session || (session.user as any).role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session || ((session.user as any).role !== 'admin' && (session.user as any).role !== 'super-admin')) {
+    return NextResponse.json({ error: 'Admin only.' }, { status: 403 });
   }
 
   try {

@@ -47,7 +47,7 @@ const patchSchema = z.object({
 // PATCH /api/requests/:id  -> admin approves / rejects a request
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
+  if (!session || (session.user.role !== 'admin' && session.user.role !== 'super-admin')) {
     return NextResponse.json({ error: 'Admin only.' }, { status: 403 });
   }
 

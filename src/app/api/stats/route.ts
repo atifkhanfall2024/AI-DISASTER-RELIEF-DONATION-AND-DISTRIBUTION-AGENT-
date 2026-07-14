@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 import { connectDB } from '@/lib/mongodb';
 import ReliefRequest from '@/lib/models/Request';
 import Donation from '@/lib/models/Donation';
@@ -7,6 +9,9 @@ import Distribution from '@/lib/models/Distribution';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const session = await getServerSession(authOptions);
+  const isSuper = session?.user?.role === 'super-admin';
+  
   await connectDB();
   const [total, pending, approved, rejected, fulfilled, donations] = await Promise.all([
     ReliefRequest.countDocuments(),
@@ -35,10 +40,10 @@ export async function GET() {
     approved,
     rejected,
     fulfilled,
-    totalDonations: donations[0]?.total || 0,
-    donationCount: donations[0]?.count || 0,
+    totalDonations: isSuper ? (donations[0]?.total || 0) : 0,
+    donationCount: isSuper ? (donations[0]?.count || 0) : 0,
     familiesHelped: familiesAgg[0]?.total || 0,
     familiesReached: reachedAgg[0]?.total || 0,
-    fundsDistributed: reachedAgg[0]?.spent || 0
+    fundsDistributed: isSuper ? (reachedAgg[0]?.spent || 0) : 0
   });
 }

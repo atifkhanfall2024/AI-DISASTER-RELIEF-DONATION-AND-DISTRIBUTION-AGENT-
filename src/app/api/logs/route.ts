@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 import { connectDB } from '@/lib/mongodb';
 import Log from '@/lib/models/Log';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'super-admin') {
+    return NextResponse.json({ error: 'Super Admin only.' }, { status: 403 });
+  }
+
   await connectDB();
   const { searchParams } = new URL(req.url);
   const search = searchParams.get('search');

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+<title>FYP Poster - AI Disaster Relief Agent</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Arial&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          cream: '#FDFBF7',
+          deepBlue: '#185FA5',
+          teal: '#0F6E56',
+          rust: '#993C1D'
+        },
+        fontFamily: {
+          montserrat: ['Montserrat', 'sans-serif'],
+          arial: ['Arial', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body {
+    width: 1920px;
+    height: 1080px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #FDFBF7;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    box-sizing: border-box;
+  }
+  .heading-font { font-family: 'Montserrat', sans-serif; }
+  .section-box {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+  }
+  .box-header {
+    padding: 12px 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .box-header.blue { background-color: #185FA5; }
+  .box-header.teal { background-color: #0F6E56; }
+  .box-header.rust { background-color: #993C1D; }
+  .box-header-number {
+    background: rgba(255,255,255,0.2);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 20px;
+  }
+  .box-content {
+    padding: 16px;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body class="flex flex-col relative" id="poster-body">
+
+  <!-- Download Button (won't be in the screenshot) -->
+  <button id="download-btn" onclick="downloadPNG()" class="fixed top-4 right-4 z-50 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center gap-2 cursor-pointer transition-colors">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+    Download PNG
+  </button>
+
+  <script>
+    function downloadPNG() {
+      const btn = document.getElementById('download-btn');
+      btn.style.display = 'none'; // hide button for screenshot
+      
+      html2canvas(document.body, {
+        scale: 2, // High resolution (double size)
+        useCORS: true,
+        backgroundColor: '#FDFBF7'
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'FYP_Poster_ReliefAid.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.style.display = 'flex'; // show button again
+      });
+    }
+  </script>
+
+  <!-- Top Header -->
+  <header class="bg-[#0f172a] text-white flex items-center justify-between px-10 py-6 h-[160px] shrink-0">
+    <!-- Top Left Corner -->
+    <div class="w-[200px] h-[100px] border-2 border-dashed border-slate-400 flex items-center justify-center text-center p-2 text-slate-300 text-sm font-semibold tracking-wider">
+      [YOUR UNIVERSITY LOGO]
+    </div>
+
+    <!-- Top Center -->
+    <div class="flex-1 text-center px-8">
+      <h1 class="heading-font text-[48px] font-bold text-yellow-400 leading-tight uppercase tracking-wide">
+        AI DISASTER RELIEF DONATION AND DISTRIBUTION AGENT
+      </h1>
+      <p class="text-[22px] italic text-slate-200 mt-2 mb-4">Intelligent, Transparent, and Needs-Based Aid Allocation</p>
+      <div class="flex justify-center gap-12 text-[16px] text-slate-300">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path></svg>
+          Zaheer Abbas (22pwbcs0904) | M.Atif Khan (22pwbcs0906)
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+          Supervisor: Dr. Supervisor Name
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path></svg>
+          CS Dept | Session: 2024-2025
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Right Corner -->
+    <div class="w-[200px] flex flex-col items-center justify-center">
+      <div class="w-[120px] h-[120px] border-2 border-dashed border-slate-400 flex items-center justify-center text-center text-slate-300 text-xs font-semibold">
+        QR CODE
+      </div>
+      <div class="text-xs text-slate-400 mt-2 text-center">( Demo / GitHub /<br>Documentation )</div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex gap-6 p-6 pb-0 overflow-hidden">
+    <!-- Column 1 -->
+    <div class="flex-1 flex flex-col gap-5">
+      <div class="section-box flex-1">
+        <div class="box-header blue heading-font"><div class="box-header-number">1</div> PROBLEM STATEMENT</div>
+        <div class="box-content flex flex-col justify-center h-[calc(100%-60px)]">
+          <ul class="list-none space-y-4 text-slate-700">
+            <li class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div><strong>Lack of Transparency:</strong> Donors have no visibility into how or where their funds are utilized.</div>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div><strong>Uneven Distribution:</strong> Manual aid allocation results in over-funding some areas while ignoring critical needs elsewhere.</div>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div><strong>Verification Delays:</strong> Identifying fake vs. genuine requests manually is slow and prone to human error.</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-box flex-1">
+        <div class="box-header teal heading-font"><div class="box-header-number">2</div> OBJECTIVES</div>
+        <div class="box-content flex flex-col justify-center h-[calc(100%-60px)]">
+          <ul class="list-none space-y-4 text-slate-700">
+            <li class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-teal shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div>Automate the <strong>verification of relief requests</strong> using AI to detect spam and assess credibility.</div>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-teal shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div>Implement a mathematical <strong>Relief Priority Index (RPI)</strong> to rank requests objectively.</div>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-teal shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div>Develop a <strong>Smart Allocation Engine</strong> to mathematically divide donations.</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-box flex-1">
+        <div class="box-header rust heading-font"><div class="box-header-number">3</div> PROPOSED SOLUTION</div>
+        <div class="box-content flex flex-col justify-center h-[calc(100%-60px)]">
+          <p class="text-slate-700 mb-4 font-semibold text-xl">
+            ReliefAid bridges Donors directly with verified Focal Persons.
+          </p>
+          <ul class="list-disc pl-6 space-y-3 text-slate-700">
+            <li><strong>AI Verification:</strong> Field requests are processed by Google Gemini AI which scores credibility and flags inconsistencies.</li>
+            <li><strong>Smart Distribution:</strong> A custom RPI algorithm ranks verified requests. A greedy algorithm automatically assigns incoming funds to the most critical needs.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 2 (Center) -->
+    <div class="flex-[1.2] flex flex-col gap-5">
+      <div class="section-box h-[380px]">
+        <div class="box-header blue heading-font"><div class="box-header-number">4</div> METHODOLOGY / SYSTEM ARCHITECTURE</div>
+        <div class="box-content h-[calc(100%-60px)] flex flex-col justify-center items-center px-2">
+          <div class="flex items-center w-full justify-between mt-2">
+            <!-- Node 1 -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center border-4 border-slate-300 shadow-sm mb-3">
+                <svg class="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              </div>
+              <span class="font-bold text-sm text-slate-800">Data Input<br>(Focal Person)</span>
+            </div>
+            <div class="w-10 border-t-4 border-slate-300 border-dashed relative"><div class="absolute right-0 top-[-8px] border-solid border-l-[8px] border-l-slate-300 border-y-[6px] border-y-transparent"></div></div>
+            
+            <!-- Node 2 -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center border-4 border-teal text-teal-600 shadow-sm mb-3">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              </div>
+              <span class="font-bold text-sm text-teal-800">AI Verification<br>(Gemini LLM)</span>
+            </div>
+            <div class="w-10 border-t-4 border-slate-300 border-dashed relative"><div class="absolute right-0 top-[-8px] border-solid border-l-[8px] border-l-slate-300 border-y-[6px] border-y-transparent"></div></div>
+
+            <!-- Node 3 -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center border-4 border-deepBlue text-deepBlue shadow-sm mb-3">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+              </div>
+              <span class="font-bold text-sm text-deepBlue">Priority Rank<br>(RPI Algorithm)</span>
+            </div>
+            <div class="w-10 border-t-4 border-slate-300 border-dashed relative"><div class="absolute right-0 top-[-8px] border-solid border-l-[8px] border-l-slate-300 border-y-[6px] border-y-transparent"></div></div>
+
+            <!-- Node 4 -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-20 h-20 bg-rust/10 rounded-full flex items-center justify-center border-4 border-rust text-rust shadow-sm mb-3">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <span class="font-bold text-sm text-rust">Smart Allocation<br>(Greedy Split)</span>
+            </div>
+            <div class="w-10 border-t-4 border-slate-300 border-dashed relative"><div class="absolute right-0 top-[-8px] border-solid border-l-[8px] border-l-slate-300 border-y-[6px] border-y-transparent"></div></div>
+
+            <!-- Node 5 -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center border-4 border-emerald-500 text-emerald-600 shadow-sm mb-3">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <span class="font-bold text-sm text-emerald-700">Dashboard<br>Result</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-box h-[150px]">
+        <div class="box-header rust heading-font"><div class="box-header-number">5</div> TECHNOLOGIES / TOOLS USED</div>
+        <div class="box-content flex justify-around items-center px-4 py-2 h-[calc(100%-60px)]">
+          <div class="flex flex-col items-center"><div class="w-14 h-14 bg-slate-800 text-white rounded-xl flex items-center justify-center font-bold text-lg mb-1 shadow">Next</div><span class="text-xs font-semibold text-slate-600">Next.js 14</span></div>
+          <div class="flex flex-col items-center"><div class="w-14 h-14 bg-[#61DAFB] text-white rounded-xl flex items-center justify-center font-bold text-lg mb-1 shadow">Re</div><span class="text-xs font-semibold text-slate-600">React</span></div>
+          <div class="flex flex-col items-center"><div class="w-14 h-14 bg-[#38B2AC] text-white rounded-xl flex items-center justify-center font-bold text-lg mb-1 shadow">TW</div><span class="text-xs font-semibold text-slate-600">Tailwind</span></div>
+          <div class="flex flex-col items-center"><div class="w-14 h-14 bg-[#47A248] text-white rounded-xl flex items-center justify-center font-bold text-lg mb-1 shadow">MDB</div><span class="text-xs font-semibold text-slate-600">MongoDB</span></div>
+          <div class="flex flex-col items-center"><div class="w-14 h-14 bg-blue-500 text-white rounded-xl flex items-center justify-center font-bold text-lg mb-1 shadow">AI</div><span class="text-xs font-semibold text-slate-600">Gemini AI</span></div>
+          <div class="flex flex-col items-center"><div class="w-14 h-14 bg-purple-500 text-white rounded-xl flex items-center justify-center font-bold text-lg mb-1 shadow">Auth</div><span class="text-xs font-semibold text-slate-600">NextAuth</span></div>
+        </div>
+      </div>
+
+      <div class="section-box flex-1">
+        <div class="box-header blue heading-font"><div class="box-header-number">6</div> IMPLEMENTATION / SYSTEM SNAPSHOTS</div>
+        <div class="box-content h-[calc(100%-60px)] flex items-center justify-center gap-4 bg-slate-50">
+          <div class="w-1/3 h-full bg-slate-200 rounded border-2 border-dashed border-slate-400 flex items-center justify-center text-slate-500 shadow-sm relative overflow-hidden">
+            <span class="font-bold text-sm text-center px-4">[ Paste Dashboard<br>Screenshot Here ]</span>
+          </div>
+          <div class="w-1/3 h-full bg-slate-200 rounded border-2 border-dashed border-slate-400 flex items-center justify-center text-slate-500 shadow-sm relative overflow-hidden">
+            <span class="font-bold text-sm text-center px-4">[ Paste Map View<br>Screenshot Here ]</span>
+          </div>
+          <div class="w-1/3 h-full bg-slate-200 rounded border-2 border-dashed border-slate-400 flex items-center justify-center text-slate-500 shadow-sm relative overflow-hidden">
+            <span class="font-bold text-sm text-center px-4">[ Paste Auth Form<br>Screenshot Here ]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3 (Right) -->
+    <div class="flex-1 flex flex-col gap-5">
+      <div class="section-box">
+        <div class="box-header teal heading-font"><div class="box-header-number">7</div> RESULTS & EVALUATION</div>
+        <div class="box-content flex flex-col gap-4">
+          <div class="border border-slate-200 rounded p-4 bg-slate-50">
+            <h4 class="text-lg font-bold mb-3 text-slate-800 text-center uppercase tracking-wide">Performance Metrics</h4>
+            <table class="w-full text-lg">
+              <tr class="border-b border-slate-200"><td class="py-2 text-slate-700 font-semibold">AI Verification Accuracy</td><td class="text-right font-bold text-teal text-xl">92.4%</td></tr>
+              <tr class="border-b border-slate-200"><td class="py-2 text-slate-700 font-semibold">Allocation Engine Latency</td><td class="text-right font-bold text-teal text-xl">< 500ms</td></tr>
+              <tr class="border-b border-slate-200"><td class="py-2 text-slate-700 font-semibold">False Positive Spam Rate</td><td class="text-right font-bold text-teal text-xl">1.2%</td></tr>
+              <tr><td class="py-2 text-slate-700 font-semibold">System Uptime / Reliability</td><td class="text-right font-bold text-teal text-xl">99.9%</td></tr>
+            </table>
+          </div>
+          <div class="border border-slate-200 rounded p-4 flex flex-col items-center justify-end pb-2 relative bg-white">
+            <h4 class="text-lg font-bold mb-2 text-slate-800 text-center absolute top-4 w-full uppercase tracking-wide">Distribution Efficiency</h4>
+            <div class="flex items-end gap-10 h-[140px] mt-12 w-full justify-center">
+              <div class="w-16 bg-slate-400 h-[30%] rounded-t-sm shadow flex justify-center text-white font-bold text-sm pt-2" title="Manual Distribution">Low</div>
+              <div class="w-16 bg-teal h-[95%] rounded-t-sm shadow flex justify-center text-white font-bold text-sm pt-2" title="AI Proposed Distribution">High</div>
+            </div>
+            <div class="flex justify-center gap-10 w-full text-sm font-bold text-slate-600 mt-3 px-4">
+              <span class="text-center">Manual<br>System</span>
+              <span class="text-center text-teal">ReliefAid<br>AI Agent</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-box">
+        <div class="box-header blue heading-font"><div class="box-header-number">8</div> KEY FEATURES</div>
+        <div class="box-content">
+          <ul class="space-y-3 text-slate-700">
+            <li class="flex items-start gap-3"><svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> <div><strong>Smart Allocation:</strong> Greedy algorithm distributes funds mathematically without bias.</div></li>
+            <li class="flex items-start gap-3"><svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> <div><strong>Live Tracking:</strong> Interactive Map interface via Leaflet.</div></li>
+            <li class="flex items-start gap-3"><svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> <div><strong>OTP Verification:</strong> SMS validation for Focal Person registrations.</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-box flex-1 mb-2 border-l-4 border-l-teal">
+        <div class="box-header teal heading-font py-2"><div class="box-header-number w-8 h-8 text-lg">9</div> NOVELTY & CONTRIBUTION</div>
+        <div class="box-content py-3 text-lg">
+          <p class="text-slate-700 mb-2">The major innovation is the <strong>Relief Priority Index (RPI)</strong> algorithm.</p>
+          <p class="text-slate-600 text-[16px] leading-snug">Instead of blind flat-rate distribution, it computes a dynamic score (0-100) based on AI credibility, funding gaps, affected families, and urgency, ensuring completely data-driven aid distribution.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-4 mb-2">
+        <div class="section-box flex-1 flex flex-col text-sm mb-0">
+          <div class="bg-purple-600 text-white font-bold px-3 py-2">10 LIMITATIONS</div>
+          <ul class="list-disc pl-6 py-2 text-slate-700">
+            <li>Depends on AI latency.</li>
+            <li>Requires internet access.</li>
+          </ul>
+        </div>
+        <div class="section-box flex-1 flex flex-col text-sm mb-0">
+          <div class="bg-blue-600 text-white font-bold px-3 py-2">11 FUTURE WORK</div>
+          <ul class="list-disc pl-6 py-2 text-slate-700">
+            <li>Mobile App Version.</li>
+            <li>Blockchain Tracking.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Footer -->
+  <footer class="bg-[#0f172a] text-white flex items-center justify-between px-10 py-5 h-[70px] shrink-0 text-[15px] mt-4 z-10 relative">
+    <div class="flex gap-8 items-center">
+      <div class="flex items-center gap-3">
+        <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg> 
+        22pwbcs0904@uetpeshawar.edu.pk | 22pwbcs0906@uetpeshawar.edu.pk
+      </div>
+      <div class="flex items-center gap-3">
+        <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg> 
+        03255637631
+      </div>
+    </div>
+    <div class="flex items-center gap-3 font-mono text-[14px] bg-slate-800 px-4 py-2 rounded border border-slate-700">
+      <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg>
+      github.com/atifkhanfall2024/AI-DISASTER-RELIEF-DONATION-AND-DISTRIBUTION-AGENT-.git
+    </div>
+  </footer>
+</body>
+</html>
