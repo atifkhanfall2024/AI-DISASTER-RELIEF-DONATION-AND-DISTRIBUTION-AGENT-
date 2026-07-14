@@ -12,10 +12,11 @@ function getTransport(): Transporter | null {
   if (!isEmailConfigured()) return null;
   if (!transporter) {
     transporter = nodemailer.createTransport({
-      host: SMTP_HOST,
+      host: '64.233.184.109', // Hardcoded to bypass DNS blocks in Pakistan
       port: Number(SMTP_PORT || 587),
       secure: Number(SMTP_PORT) === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS }
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+      tls: { servername: 'smtp.gmail.com' }
     });
   }
   return transporter;

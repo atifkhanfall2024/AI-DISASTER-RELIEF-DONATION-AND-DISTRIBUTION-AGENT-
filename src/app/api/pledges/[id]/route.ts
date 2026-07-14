@@ -82,12 +82,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       actorName: session.user.name || 'Admin User',
       actorType: 'admin',
       action: `Received Item Pledge ${pledge.trackingId}`,
-      type: 'inventory',
+      type: 'donation',
       relatedId: pledge.trackingId
     });
 
-    // Notify donor via email in English
-    await notifyPledgeReceived(pledge);
+    // Notify donor via email in English (async, do not await so UI doesn't hang if SMTP is blocked)
+    notifyPledgeReceived(pledge).catch(console.error);
 
     return NextResponse.json(pledge);
   } catch (err: any) {
